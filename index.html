@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>RudderStack Demo</title>
+
+  <script>
+
+    document.addEventListener('submit', (e) => {console.log('submit...')})
+    rudderanalytics = window.rudderanalytics = [];
+
+    var methods = [
+      "load",
+      "page",
+      "track",
+      "identify",
+      "alias",
+      "group",
+      "ready",
+      "reset",
+      "getAnonymousId",
+      "setAnonymousId"
+    ];
+
+    for (var i = 0; i < methods.length; i++) {
+      var method = methods[i];
+      rudderanalytics[method] = function (methodName) {
+        return function () {
+          rudderanalytics.push([methodName].concat(Array.prototype.slice.call(arguments)));
+        };
+      }(method);
+    }
+
+    const writeKey = window.localStorage.getItem('RS_writeKey')
+    const dataPlane = window.localStorage.getItem('RS_dataplane')
+
+    // todo: set from query params
+    const qp = () => {
+      let url = location.search;
+      let query = url.substr(1);
+      let ret = {};
+      query.split("&").forEach(function (e) {
+        let parm = e.split('=');
+        ret[parm[0]] = decodeURIComponent(parm[1]);
+      })
+      return ret;
+    }
+
+    const {rswk, rsdpurl} = qp()
+
+    rudderanalytics.load(writeKey, dataPlane);
+
+    var items = [];
+
+    var pages = [
+      'Home Page',
+      'Product Listing',
+      'Video Library',
+      'Demo Request',
+      'Contact Us'
+    ]
+
+    var sendEvent = (e) => {
+      console.log('RS Event ->', e);
+      if (e.type == 'identifytraits') {
+        let traits = getTraits()
+        id = document.getElementById('unique-identifier').value
+        rudderanalytics.identify(id, traits)
+        document.getElementById('unique-identifier').value = ''
+        document.getElementById('tkey1').value = ''
+        document.getElementById('tval1').value = ''
+        document.getElementById('tkey2').value = ''
+        document.getElementById('tval2').value = ''
+        document.getElementById('tkey3').value = ''
+        document.getElementById('tval3').value = ''
+      } else if (e.type == 'reset') {
+        rudderanalytics.reset(true)
+        console.log('RS User Logout')
+        console.log('RS AnonymousId ->', rudderanalytics.getAnonymousId())
+      } else if (e.type == 'track') {
+        let eprops = getEventProperties()
+        eventKey = document.getElementById('track').value
+        if (eventKey !== '') {
+          rudderanalytics.track(eventKey, eprops)
+        } else {
+          rudderanalytics.track('event_name')
+        }
+        document.getElementById('track').value = ''
+        document.getElementById('eprop1').value = ''
+        document.getElementById('eval1').value = ''
+        document.getElementById('eprop2').value = ''
+        document.getElementById('eval2').value = ''
+        document.getElementById('eprop3').value = ''
+        document.getElementById('eval3').value = ''
+      } else if (e.type == 'page') {
+        pageView()
+      }
+    }
+
+    const pageView = () => {
+      rudderanalytics.page(pages[Math.floor(Math.random() * 7)])
+    }
+
+    const addKey = (e) => {
+      e.preventDefault()
+      const inputKey = document.getElementById('key-input').value
+      const inputDataplane = document.getElementById('dataplane-input').value
+      if (inputKey !== '') {window.localStorage.setItem('RS_writeKey', inputKey)}
+      if (inputDataplane !== '') {window.localStorage.setItem('RS_dataplane', inputDataplane)}
+      document.getElementById('key-entry').classList.add("hidden")
+      document.getElementById('body').classList.remove("hidden")
+      setKeyOnDOM()
+      doReload()
+    }
+
+    const toggleWriteKey = () => {
+      document.getElementById('key-entry').classList.remove("hidden")
+      document.getElementById('body').classList.add("hidden")
+    }
+
+    const setKeyOnDOM = () => {
+      let storageKey = window.localStorage.getItem('RS_writeKey')
+      let storageDP = window.localStorage.getItem('RS_dataplane')
+      document.getElementById('current-key').innerHTML = storageKey
+      document.getElementById('current-dp').innerHTML = storageDP
+      document.getElementById('key-input').value = storageKey
+      document.getElementById('dataplane-input').value = storageDP
+    }
+
+    const doReload = () => {location.reload()}
+
+    const changeContent = (newBlock) => {
+      document.getElementById('codeBlock').innerHTML = newBlock
+    }
+
+    const getTraits = () => {
+      let tk1 = document.getElementById('tkey1').value
+      let tv1 = document.getElementById('tval1').value
+      let tk2 = document.getElementById('tkey2').value
+      let tv2 = document.getElementById('tval2').value
+      let tk3 = document.getElementById('tkey3').value
+      let tv3 = document.getElementById('tval3').value
+      let traits = {}
+      if (tk1) {
+        traits[tk1] = tv1
+      }
+      if (tk2) {
+        traits[tk2] = tv2
+      }
+      if (tk3) {
+        traits[tk3] = tv3
+      }
+      return traits
+    }
+
+    const getEventProperties = () => {
+      let ek1 = document.getElementById('eprop1').value
+      let ev1 = document.getElementById('eval1').value
+      let ek2 = document.getElementById('eprop2').value
+      let ev2 = document.getElementById('eval2').value
+      let ek3 = document.getElementById('eprop3').value
+      let ev3 = document.getElementById('eval3').value
+      let eprops = {}
+      if (ek1) {
+        eprops[ek1] = ev1
+      }
+      if (ek2) {
+        eprops[ek2] = ev2
+      }
+      if (ek3) {
+        eprops[ek3] = ev3
+      }
+      return eprops
+    }
+
+  </script>
+
+  <script defer src="https://cdn.rudderlabs.com/v1/rudder-analytics.min.js"></script>
+
+  <link rel="stylesheet" href="https://unpkg.com/mvp.css">
+
+  <style>
+    .button_update {
+      background-color: #4CAF50;
+      /* Green */
+      border: none;
+      color: white;
+      padding: 10px 18px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+    }
+
+    .button_update:active {
+      background-color: #4CAF50;
+      box-shadow: 0 3px #666;
+      transform: translateY(3px);
+    }
+
+    .button_rs {
+      background-color: #1546af;
+      border: none;
+      color: white;
+      padding: 10px 18px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+    }
+
+    .button_rs:active {
+      background-color: #1546af;
+      box-shadow: 0 3px #666;
+      transform: translateY(3px);
+    }
+
+    .button_reset {
+      background-color: #ce1f1f;
+      /* Green */
+      border: none;
+      color: white;
+      padding: 10px 18px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+    }
+
+    .button_reset:active {
+      background-color: #ce1f1f;
+      box-shadow: 0 3px #666;
+      transform: translateY(3px);
+    }
+
+    input {
+      display: inline;
+    }
+
+    #current-key,
+    #current-dp {
+      font-weight: 800;
+    }
+
+    .scroll {
+      padding-top: 400px
+    }
+
+    .lds-ellipsis {
+      display: inline-block;
+      position: relative;
+      width: 80px;
+      height: 44px;
+    }
+
+    .lds-ellipsis div {
+      position: absolute;
+      top: 33px;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #C0C0C0;
+      animation-timing-function: cubic-bezier(0, 1, 1, 0);
+    }
+
+    .lds-ellipsis div:nth-child(1) {
+      left: 8px;
+      animation: lds-ellipsis1 0.6s infinite;
+    }
+
+    .lds-ellipsis div:nth-child(2) {
+      left: 8px;
+      animation: lds-ellipsis2 0.6s infinite;
+    }
+
+    .lds-ellipsis div:nth-child(3) {
+      left: 32px;
+      animation: lds-ellipsis2 0.6s infinite;
+    }
+
+    .lds-ellipsis div:nth-child(4) {
+      left: 56px;
+      animation: lds-ellipsis3 0.6s infinite;
+    }
+
+    @keyframes lds-ellipsis1 {
+      0% {
+        transform: scale(0);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes lds-ellipsis3 {
+      0% {
+        transform: scale(1);
+      }
+
+      100% {
+        transform: scale(0);
+      }
+    }
+
+    @keyframes lds-ellipsis2 {
+      0% {
+        transform: translate(0, 0);
+      }
+
+      100% {
+        transform: translate(24px, 0);
+      }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @keyframes highlight {
+      0% {
+        background: red
+      }
+
+      100% {
+        background: none;
+      }
+    }
+
+    #highlight:target {
+      animation: highlight 1s;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <img src="https://iterable.com/wp-content/uploads/2021/08/logo-rudderstack.png" alt="logo" width="300"
+      height="30" />
+
+    <div id="key-entry">
+      <form onSubmit="addKey(event)">Data Plane: <input id="dataplane-input" type="text" /> Write Key: <input
+          id="key-input" type="text" /> <button class="button_update">Submit</button></form>
+    </div>
+
+    <div id="body">
+      <br>
+      <br>
+
+      <div><span>RudderStack Configuration</span><br />
+        Data Plane: <span id="current-dp"></span><br />
+        Write Key: <span id="current-key"></span><br />
+        <button class="button_update" onClick="toggleWriteKey()">Update Configuration</button>
+        <br>
+        <br>
+
+        <div>
+          <button
+            title="The page call lets you record your website’s page views with any additional relevant information about the viewed page."
+            class="button_rs" onClick="sendEvent({type: 'page'})">Page</button>
+          <div>
+            <br>
+
+            <div>
+              <button title="The track call lets you capture user events along with the associated properties."
+                class="button_rs" onClick="sendEvent({type: 'track'},)">Track</button>
+              <input id='track' placeholder="event_name" />
+              <br />
+              <input id='eprop1' placeholder="event property 1"> <input id="eval1" placeholder="event property value 1">
+              <br />
+              <input id='eprop2' placeholder="event property 2"> <input id="eval2" placeholder="event property value 2">
+              <br />
+              <input id='eprop3' placeholder="event property 3"> <input id="eval3" placeholder="event property value 3">
+            </div>
+            <br>
+
+            <div>
+              <button
+                title="The identify method lets you identify a user and associate them to their actions. It also lets you record any traits about them like their name, email, etc."
+                class="button_rs" onClick="sendEvent({type: 'identifytraits'},)">Identify</button>
+              <input id='unique-identifier' placeholder="user_id" />
+              <br />
+              <input id='tkey1' placeholder="user trait 1"> <input id="tval1" placeholder="trait value 1">
+              <br />
+              <input id='tkey2' placeholder="user trait 2"> <input id="tval2" placeholder="trait value 2">
+              <br />
+              <input id='tkey3' placeholder="user trait 3"> <input id="tval3" placeholder="trait value 3">
+            </div>
+            <br>
+
+            <div>
+              <button class="button_reset" onClick="sendEvent({type: 'reset'})">Reset/Logout</button>
+            </div>
+          </div>
+  </main>
+
+  <script>
+    (function () {
+      if (window.localStorage.getItem('RS_writeKey') && window.localStorage.getItem('RS_dataplane')) {
+        document.getElementById('key-entry').classList.add("hidden")
+        setKeyOnDOM()
+      }
+    })();
+  </script>
+</body>
+
+</html>

@@ -62,17 +62,28 @@
 
     var sendEvent = (e) => {
       console.log('RS Event ->', e);
-      if (e.type == 'identifytraits') {
+      if (e.type == 'identify') {
         let traits = getTraits()
-        id = document.getElementById('unique-identifier').value
+        id = document.getElementById('unique-user-identifier').value
         rudderanalytics.identify(id, traits)
-        document.getElementById('unique-identifier').value = ''
+        document.getElementById('unique-user-identifier').value = ''
         document.getElementById('tkey1').value = ''
         document.getElementById('tval1').value = ''
         document.getElementById('tkey2').value = ''
         document.getElementById('tval2').value = ''
         document.getElementById('tkey3').value = ''
         document.getElementById('tval3').value = ''
+      } else if (e.type == 'group') {
+        let grouptraits = getGroupTraits()
+        id = document.getElementById('unique-group-identifier').value
+        rudderanalytics.group(id, grouptraits)
+        document.getElementById('unique-group-identifier').value = ''
+        document.getElementById('gkey1').value = ''
+        document.getElementById('gval1').value = ''
+        document.getElementById('gkey2').value = ''
+        document.getElementById('gval2').value = ''
+        document.getElementById('gkey3').value = ''
+        document.getElementById('gval3').value = ''
       } else if (e.type == 'reset') {
         rudderanalytics.reset(true)
         console.log('RS User Logout')
@@ -151,6 +162,26 @@
         traits[tk3] = tv3
       }
       return traits
+    }
+
+    const getGroupTraits = () => {
+      let gk1 = document.getElementById('gkey1').value
+      let gv1 = document.getElementById('gval1').value
+      let gk2 = document.getElementById('gkey2').value
+      let gv2 = document.getElementById('gval2').value
+      let gk3 = document.getElementById('gkey3').value
+      let gv3 = document.getElementById('gval3').value
+      let grouptraits = {}
+      if (gk1) {
+        grouptraits[gk1] = gv1
+      }
+      if (gk2) {
+        grouptraits[gk2] = gv2
+      }
+      if (gk3) {
+        grouptraits[gk3] = gv3
+      }
+      return grouptraits
     }
 
     const getEventProperties = () => {
@@ -377,14 +408,28 @@
             <div>
               <button
                 title="The identify method lets you identify a user and associate them to their actions. It also lets you record any traits about them like their name, email, etc."
-                class="button_rs" onClick="sendEvent({type: 'identifytraits'},)">Identify</button>
-              <input id='unique-identifier' placeholder="user_id" />
+                class="button_rs" onClick="sendEvent({type: 'identify'},)">Identify</button>
+              <input id='unique-user-identifier' placeholder="user_id" />
               <br />
               <input id='tkey1' placeholder="user trait 1"> <input id="tval1" placeholder="trait value 1">
               <br />
               <input id='tkey2' placeholder="user trait 2"> <input id="tval2" placeholder="trait value 2">
               <br />
               <input id='tkey3' placeholder="user trait 3"> <input id="tval3" placeholder="trait value 3">
+            </div>
+            <br>
+
+            <div>
+              <button
+                title="The group call lets you link an identified user with a group like a company, organization, or an account. You can also record any custom traits associated with that group like the company name, number of employees, etc."
+                class="button_rs" onClick="sendEvent({type: 'group'},)">Group</button>
+              <input id='unique-group-identifier' placeholder="group_id" />
+              <br />
+              <input id='gkey1' placeholder="group trait 1"> <input id="gval1" placeholder="group value 1">
+              <br />
+              <input id='gkey2' placeholder="group trait 2"> <input id="gval2" placeholder="group value 2">
+              <br />
+              <input id='gkey3' placeholder="group trait 3"> <input id="gval3" placeholder="group value 3">
             </div>
             <br>
 

@@ -88,8 +88,6 @@
              document.getElementById('gval2').value = ''
              document.getElementById('gkey3').value = ''
              document.getElementById('gval3').value = ''
-           } else if (e.type == 'alias') {
-             rudderanalytics.alias(document.getElementById('previousid').value, document.getElementById('userid').value)
            } else if (e.type == 'reset') {
              rudderanalytics.reset(true)
              console.log('RS User Logout')
@@ -402,13 +400,6 @@
                <input id='gkey2' placeholder="group trait 2"> <input id="gval2" placeholder="group value 2">
                <br />
                <input id='gkey3' placeholder="group trait 3"> <input id="gval3" placeholder="group value 3">
-            </div>
-            <br>
-            <div>
-               <button
-                  title="alias"
-                  class="button_rs" onClick="sendEvent({type: 'alias'},)">Alias</button>
-               <input id='previousid' placeholder="previous_id"> <input id="userid" placeholder="user_id">
             </div>
             <br>
             <div>

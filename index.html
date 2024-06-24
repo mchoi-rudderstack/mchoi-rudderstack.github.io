@@ -94,7 +94,8 @@
         document.getElementById('gkey3').value = ''
         document.getElementById('gval3').value = ''
       } else if (e.type == 'reset') {
-        rudderanalytics.reset(true)
+        rudderanalytics.setAnonymousId()
+        // rudderanalytics.reset(true)
         console.log('RS User Logout')
         console.log('RS AnonymousId ->', rudderanalytics.getAnonymousId())
       } else if (e.type == 'track') {

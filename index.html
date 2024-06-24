@@ -376,11 +376,11 @@
 <body>
   <main>
     <img src="https://iterable.com/wp-content/uploads/2021/08/logo-rudderstack.png" alt="logo" width="300"
-      height="30" />
+      height="30">
 
     <div id="key-entry">
-      <form onSubmit="addKey(event)">Data Plane: <input id="dataplane-input" type="text" /> Write Key: <input
-          id="key-input" type="text" /> <button class="button_update">Submit</button></form>
+      <form onSubmit="addKey(event)">Data Plane: <input id="dataplane-input" type="text"> Write Key: <input
+          id="key-input" type="text"> <button class="button_update">Submit</button></form>
     </div>
 
     <div id="body">
@@ -404,7 +404,7 @@
             <div>
               <button title="The track call lets you capture user events along with the associated properties."
                 class="button_rs" onClick="sendEvent({type: 'track'},)">Track</button>
-              <input id='track' placeholder="event_name" />
+              <input id='track' placeholder="event_name">
               <br>
               <input id='eprop1' placeholder="event property 1"> <input id="eval1" placeholder="event property value 1">
               <br>
@@ -418,7 +418,7 @@
               <button
                 title="The identify method lets you identify a user and associate them to their actions. It also lets you record any traits about them like their name, email, etc."
                 class="button_rs" onClick="sendEvent({type: 'identify'},)">Identify</button>
-              <input id='unique-user-identifier' placeholder="user_id" />
+              <input id='unique-user-identifier' placeholder="user_id">
               <br>
               <input id='tkey1' placeholder="user trait 1"> <input id="tval1" placeholder="trait value 1">
               <br>
@@ -432,7 +432,7 @@
               <button
                 title="The group call lets you link an identified user with a group like a company, organization, or an account. You can also record any custom traits associated with that group like the company name, number of employees, etc."
                 class="button_rs" onClick="sendEvent({type: 'group'},)">Group</button>
-              <input id='unique-group-identifier' placeholder="group_id" />
+              <input id='unique-group-identifier' placeholder="group_id">
               <br>
               <input id='gkey1' placeholder="group trait 1"> <input id="gval1" placeholder="group value 1">
               <br>

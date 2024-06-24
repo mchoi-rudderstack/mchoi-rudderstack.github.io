@@ -387,9 +387,9 @@
       <br>
       <br>
 
-      <div><span>RudderStack Configuration</span><br />
-        Data Plane: <span id="current-dp"></span><br />
-        Write Key: <span id="current-key"></span><br />
+      <div><span>RudderStack Configuration</span><br/>
+        Data Plane: <span id="current-dp"></span><br/>
+        Write Key: <span id="current-key"></span><br/>
         <button class="button_update" onClick="toggleWriteKey()">Update Configuration</button>
         <br>
         <br>
@@ -405,11 +405,11 @@
               <button title="The track call lets you capture user events along with the associated properties."
                 class="button_rs" onClick="sendEvent({type: 'track'},)">Track</button>
               <input id='track' placeholder="event_name" />
-              <br />
+              <br/>
               <input id='eprop1' placeholder="event property 1"> <input id="eval1" placeholder="event property value 1">
-              <br />
+              <br/>
               <input id='eprop2' placeholder="event property 2"> <input id="eval2" placeholder="event property value 2">
-              <br />
+              <br/>
               <input id='eprop3' placeholder="event property 3"> <input id="eval3" placeholder="event property value 3">
             </div>
             <br>
@@ -419,11 +419,11 @@
                 title="The identify method lets you identify a user and associate them to their actions. It also lets you record any traits about them like their name, email, etc."
                 class="button_rs" onClick="sendEvent({type: 'identify'},)">Identify</button>
               <input id='unique-user-identifier' placeholder="user_id" />
-              <br />
+              <br/>
               <input id='tkey1' placeholder="user trait 1"> <input id="tval1" placeholder="trait value 1">
-              <br />
+              <br/>
               <input id='tkey2' placeholder="user trait 2"> <input id="tval2" placeholder="trait value 2">
-              <br />
+              <br/>
               <input id='tkey3' placeholder="user trait 3"> <input id="tval3" placeholder="trait value 3">
             </div>
             <br>
@@ -433,11 +433,11 @@
                 title="The group call lets you link an identified user with a group like a company, organization, or an account. You can also record any custom traits associated with that group like the company name, number of employees, etc."
                 class="button_rs" onClick="sendEvent({type: 'group'},)">Group</button>
               <input id='unique-group-identifier' placeholder="group_id" />
-              <br />
+              <br/>
               <input id='gkey1' placeholder="group trait 1"> <input id="gval1" placeholder="group value 1">
-              <br />
+              <br/>
               <input id='gkey2' placeholder="group trait 2"> <input id="gval2" placeholder="group value 2">
-              <br />
+              <br/>
               <input id='gkey3' placeholder="group trait 3"> <input id="gval3" placeholder="group value 3">
             </div>
             <br>

@@ -1,127 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Disney Shop</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Disney Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- OneTrust Cookie Consent Notice start -->
-  <script type="text/javascript" src="https://cdn.cookielaw.org/consent/7c9b4dc8-bb26-4b56-b89b-e5fac96e61a6/OtAutoBlock.js"></script>
-  <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" type="text/javascript" charset="UTF-8" data-domain-script="7c9b4dc8-bb26-4b56-b89b-e5fac96e61a6"></script>
+    <!-- OneTrust Cookie Consent Notice start -->
+    <script type="text/javascript" src="https://cdn.cookielaw.org/consent/7c9b4dc8-bb26-4b56-b89b-e5fac96e61a6/OtAutoBlock.js"></script>
+    <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" type="text/javascript" charset="UTF-8" data-domain-script="7c9b4dc8-bb26-4b56-b89b-e5fac96e61a6"></script>
 
-  <script>
-    window.rudderanalytics = window.rudderanalytics || [];
-    window.rudderanalytics.methods = [
-      "load", "page", "track", "identify", "alias", "group", "ready", "reset", "getAnonymousId", "setAnonymousId"
-    ];
-    window.rudderanalytics.factory = function (t) {
-      return function () {
-        window.rudderanalytics.push([t].concat(Array.prototype.slice.call(arguments)));
-        return window.rudderanalytics;
+    <script>
+      window.rudderanalytics = window.rudderanalytics || [];
+      window.rudderanalytics.methods = [
+        "load", "page", "track", "identify", "alias", "group", "ready", "reset", "getAnonymousId", "setAnonymousId"
+      ];
+      window.rudderanalytics.factory = function (t) {
+        return function () {
+          window.rudderanalytics.push([t].concat(Array.prototype.slice.call(arguments)));
+          return window.rudderanalytics;
+        };
       };
-    };
-    for (var i = 0; i < window.rudderanalytics.methods.length; i++) {
-      var method = window.rudderanalytics.methods[i];
-      window.rudderanalytics[method] = window.rudderanalytics.factory(method);
-    }
-  </script>
+      for (var i = 0; i < window.rudderanalytics.methods.length; i++) {
+        var method = window.rudderanalytics.methods[i];
+        window.rudderanalytics[method] = window.rudderanalytics.factory(method);
+      }
+    </script>
 
-  <script>
-    function OptanonWrapper() {
-      const writeKey = "2fvYsCyRThc3eqsm1wbjWQffU3m";
-      const dataPlaneUrl = "https://workspacevempc.dataplane.rudderstack.com";
+    <script>
+      function OptanonWrapper() {
+        const writeKey = "2fvYsCyRThc3eqsm1wbjWQffU3m";
+        const dataPlaneUrl = "https://workspacevempc.dataplane.rudderstack.com";
 
-      const consentGroups = {
-        targeting: "C0004",
-        performance: "C0002",
-        functional: "C0003",
-        social_media: "C0005",
-        analytics: "C0007",
-        necessary: "C0001"
-      };
+        const consentGroups = {
+          targeting: "C0004",
+          performance: "C0002",
+          functional: "C0003",
+          social_media: "C0005",
+          analytics: "C0007",
+          necessary: "C0001"
+        };
 
-      const isCategoryActive = (catId) => {
-        return typeof OptanonActiveGroups !== "undefined" && OptanonActiveGroups.indexOf(catId) > -1;
-      };
+        const isCategoryActive = (catId) => {
+          return typeof OptanonActiveGroups !== "undefined" && OptanonActiveGroups.indexOf(catId) > -1;
+        };
 
-      const userConsent = {
-        targeting: isCategoryActive(consentGroups.targeting),
-        performance: isCategoryActive(consentGroups.performance),
-        functional: isCategoryActive(consentGroups.functional),
-        social_media: isCategoryActive(consentGroups.social_media),
-        analytics: isCategoryActive(consentGroups.analytics),
-        necessary: isCategoryActive(consentGroups.necessary)
-      };
+        const userConsent = {
+          targeting: isCategoryActive(consentGroups.targeting),
+          performance: isCategoryActive(consentGroups.performance),
+          functional: isCategoryActive(consentGroups.functional),
+          social_media: isCategoryActive(consentGroups.social_media),
+          analytics: isCategoryActive(consentGroups.analytics),
+          necessary: isCategoryActive(consentGroups.necessary)
+        };
 
-      rudderanalytics.load($1);
+        const hasTrackingConsent = Object.values(userConsent).some(Boolean);
 
-      rudderanalytics.ready(() => {
-        rudderanalytics.setConsent({
-          consent: userConsent
-        });
+        if (hasTrackingConsent) {
+          rudderanalytics.load(writeKey, dataPlaneUrl);
 
-        rudderanalytics.track("User Consent", {
-          consent: userConsent
-        });
-      });
+          rudderanalytics.ready(() => {
+            rudderanalytics.page();
 
-      rudderanalytics.ready(() => {
-        rudderanalytics.track("User Consent", {
-          consent: userConsent
-        });
-      });
-    }
-  </script>
-  <!-- OneTrust Cookie Consent Notice end -->
+            rudderanalytics.setConsent({
+              consent: userConsent
+            });
 
-  <script src="app.js" defer></script>
-</head>
-<body class="bg-gradient-to-b from-blue-200 to-white min-h-screen relative">
+            rudderanalytics.addIntegrationOptions &&
+              rudderanalytics.addIntegrationOptions({
+                All: {
+                  consent: userConsent
+                }
+              });
 
-  <header class="text-center py-10">
-    <h1 class="text-5xl font-bold text-blue-900">Disney Shop</h1>
-    <p class="text-lg mt-2">Magical merch for every fan</p>
-    <button id="cart-btn" class="mt-4 bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800">🛒 View Cart</button>
-  </header>
+            rudderanalytics.track("User Consent", {
+              consent: userConsent
+            });
+          });
+        }
+      }
+    </script>
+    <!-- OneTrust Cookie Consent Notice end -->
 
-  <div id="auth-section" class="absolute top-4 right-4">
-    <button onclick="toggleSignIn()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">🔐 Sign In</button>
-  </div>
+    <script src="app.js" defer></script>
+  </head>
+  <body class="bg-gradient-to-b from-blue-200 to-white min-h-screen relative">
+    <header class="text-center py-10">
+      <h1 class="text-5xl font-bold text-blue-900">Disney Shop</h1>
+      <p class="text-lg mt-2">Magical merch for every fan</p>
+      <button id="cart-btn" class="mt-4 bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800">
+        🛒 View Cart
+      </button>
+    </header>
 
-  <div id="signin-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
-    <div class="bg-white rounded-lg p-6 w-80">
-      <h2 class="text-xl font-bold mb-4">Sign In</h2>
-      <input id="email" type="email" placeholder="Email" class="w-full px-3 py-2 border rounded mb-4" />
-      <input id="password" type="password" placeholder="Password" class="w-full px-3 py-2 border rounded mb-4" />
-      <button onclick="signIn()" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full">Sign In</button>
-      <button onclick="toggleSignIn()" class="mt-2 text-sm text-red-600 underline w-full">Cancel</button>
+    <div id="auth-section" class="absolute top-4 right-4">
+      <button onclick="toggleSignIn()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        🔐 Sign In
+      </button>
+    </div>
+
+    <div id="signin-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
+      <div class="bg-white rounded-lg p-6 w-80">
+        <h2 class="text-xl font-bold mb-4">Sign In</h2>
+        <input id="email" type="email" placeholder="Email" class="w-full px-3 py-2 border rounded mb-4" />
+        <input id="password" type="password" placeholder="Password" class="w-full px-3 py-2 border rounded mb-4" />
+        <button onclick="signIn()" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full">
+          Sign In
+        </button>
+        <button onclick="toggleSignIn()" class="mt-2 text-sm text-red-600 underline w-full">
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <main class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-8 pb-12" id="product-list"></main>
+
+        
+    </div>
+
+    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-80 hidden flex justify-center items-center z-50">
+      <div class="relative">
+        <button onclick="closeImageModal()" class="absolute top-2 right-2 text-black text-xl font-bold">
+          &times;
+        </button>
+        <img id="modal-img" src="" class="max-h-[80vh] max-w-[90vw] rounded-lg shadow-lg" />
+      </div>
+    </div>
+
+    <!-- Force Tailwind to keep this class -->
+    <div class="hidden opacity-100"></div>
+
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg opacity-0 transition-opacity duration-300 z-50"></div>
+  
+<div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
+  <div class="bg-white rounded-lg p-6 w-80">
+    <input id="first-name" type="text" placeholder="First Name" class="mt-2 w-full px-2 py-1 text-sm border rounded" />
+    <input id="last-name" type="text" placeholder="Last Name" class="mt-2 w-full px-2 py-1 text-sm border rounded" />
+    <textarea id="delivery-address" placeholder="Delivery Address" class="mt-2 w-full px-2 py-1 text-sm border rounded"></textarea>
+    <ul id="cart-items" class="mt-4 space-y-2"></ul>
+    <p id="total" class="mt-4 font-semibold text-sm">Total: $0.00</p>
+    <div class="pb-24">
+      <button class="mt-4 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800" onclick="checkout()">
+        Checkout
+      </button>
+      <button class="mt-2 text-sm text-red-600 underline" onclick="toggleCart()">
+        Close
+      </button>
     </div>
   </div>
-
-  <main class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-8 pb-12" id="product-list"></main>
-
-  <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
-    <div class="bg-white rounded-lg p-6 w-96">
-      <h2 class="text-xl font-bold mb-4">Your Cart</h2>
-      <ul id="cart-items" class="space-y-2"></ul>
-      <p id="total" class="mt-4 font-semibold">Total: $0.00</p>
-      <button class="mt-4 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800" onclick="checkout()">Checkout</button>
-      <button class="mt-2 text-sm text-red-600 underline" onclick="toggleCart()">Close</button>
-    </div>
-  </div>
-
-  <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-80 hidden flex justify-center items-center z-50">
-    <div class="relative">
-      <button onclick="closeImageModal()" class="absolute top-2 right-2 text-white text-xl font-bold">&times;</button>
-      <img id="modal-img" src="" class="max-h-[80vh] max-w-[90vw] rounded-lg shadow-lg" />
-    </div>
-  </div>
-
-  <!-- Force Tailwind to keep this class -->
-  <div class="hidden opacity-100"></div>
-
-  <div id="toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg opacity-0 transition-opacity duration-300 z-50"></div>
+</div>
 
 </body>
 </html>

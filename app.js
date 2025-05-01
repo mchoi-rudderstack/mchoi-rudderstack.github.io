@@ -178,10 +178,7 @@ function checkout() {
     trackEvent("Checkout Completed", {
       cart_items: cartItems,
       total: cartTotal,
-      currency: "USD",
-      first_name: firstName,
-      last_name: lastName,
-      delivery_address: deliveryAddress
+      currency: "USD"
     });
   } else {
     console.log("RudderStack SDK not loaded. Queuing identify and checkout events");

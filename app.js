@@ -21,10 +21,6 @@ const products = [
 
 const cart = [];
 
-const firstName = document.getElementById("first-name").value.trim();
-const lastName = document.getElementById("last-name").value.trim();
-const address = document.getElementById("delivery-address").value.trim();
-
 document.addEventListener("DOMContentLoaded", () => {
   const productList = document.getElementById("product-list");
 
@@ -44,7 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("cart-btn").addEventListener("click", toggleCart);
 
-  // Close image modal on background click
   document.getElementById("image-modal").addEventListener("click", (e) => {
     if (e.target.id === "image-modal") {
       closeImageModal();
@@ -64,6 +59,24 @@ function showToast(message) {
   }, 2000);
 }
 
+// Helper function to track RudderStack events with logging
+function trackEvent(eventName, properties) {
+  if (typeof rudderanalytics !== "undefined" && typeof rudderanalytics.track === "function") {
+    console.log(`Tracking event: ${eventName}`, properties);
+    try {
+      rudderanalytics.track(eventName, properties);
+      console.log(`Event sent to RudderStack: ${eventName}`);
+    } catch (error) {
+      console.error(`Error sending event to RudderStack: ${eventName}`, error);
+    }
+  } else {
+    console.log(`RudderStack SDK not loaded. Queuing event: ${eventName}`, properties);
+    console.log("Current RudderStack queue", window.rudderanalytics);
+    window.rudderanalytics = window.rudderanalytics || [];
+    window.rudderanalytics.push(["track", eventName, properties]);
+  }
+}
+
 function addToCart(productId) {
   const product = products.find(p => p.id === productId);
   const existing = cart.find(item => item.id === productId);
@@ -74,17 +87,13 @@ function addToCart(productId) {
     cart.push({ ...product, qty: 1 });
   }
 
-  if (typeof rudderanalytics !== "undefined" && rudderanalytics.ready) {
-    rudderanalytics.ready(() => {
-      rudderanalytics.track("Product Added", {
-        product_id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: existing ? existing.qty : 1,
-        currency: "USD"
-      });
-    });
-  }
+  trackEvent("Product Added", {
+    product_id: product.id,
+    name: product.name,
+    price: product.price,
+    quantity: existing ? existing.qty : 1,
+    currency: "USD"
+  });
 
   showToast(`${product.name} added to cart!`);
 }
@@ -94,18 +103,16 @@ function toggleCart() {
   modal.classList.toggle("hidden");
 
   if (!modal.classList.contains("hidden")) {
-    if (typeof rudderanalytics !== "undefined" && rudderanalytics.ready) {
-      rudderanalytics.track("Cart Viewed", {
-        cart_items: cart.map(item => ({
-          product_id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.qty
-        })),
-        total: cart.reduce((sum, item) => sum + item.price * item.qty, 0),
-        currency: "USD"
-      });
-    }
+    trackEvent("Cart Viewed", {
+      cart_items: cart.map(item => ({
+        product_id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.qty
+      })),
+      total: cart.reduce((sum, item) => sum + item.price * item.qty, 0),
+      currency: "USD"
+    });
   }
 
   renderCart();
@@ -132,6 +139,10 @@ function renderCart() {
 }
 
 function checkout() {
+  const firstName = document.getElementById("first-name").value.trim();
+  const lastName = document.getElementById("last-name").value.trim();
+  const deliveryAddress = document.getElementById("delivery-address").value.trim();
+
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
   const cartItems = cart.map(item => ({
     product_id: item.id,
@@ -140,17 +151,39 @@ function checkout() {
     quantity: item.qty
   }));
 
-  if (typeof rudderanalytics !== "undefined" && rudderanalytics.ready) {
-    rudderanalytics.ready(() => {
-      rudderanalytics.track("Checkout Completed", {
-        cart_items: cartItems,
-        total: cartTotal,
-        currency: "USD",
+  if (typeof rudderanalytics !== "undefined" && typeof rudderanalytics.identify === "function") {
+    const email = localStorage.getItem("userEmail") || undefined;
+    console.log("Identifying user", { email, firstName, lastName, deliveryAddress });
+    try {
+      rudderanalytics.identify(email, {
         first_name: firstName,
         last_name: lastName,
-        address: address
+        delivery_address: deliveryAddress
       });
+      console.log("Identify event sent to RudderStack");
+    } catch (error) {
+      console.error("Error sending identify event to RudderStack", error);
+    }
+
+    trackEvent("Checkout Completed", {
+      cart_items: cartItems,
+      total: cartTotal,
+      currency: "USD"
     });
+  } else {
+    console.log("RudderStack SDK not loaded. Queuing identify and checkout events");
+    console.log("Current RudderStack queue", window.rudderanalytics);
+    window.rudderanalytics = window.rudderanalytics || [];
+    window.rudderanalytics.push(["identify", email, {
+      first_name: firstName,
+      last_name: lastName,
+      delivery_address: deliveryAddress
+    }]);
+    window.rudderanalytics.push(["track", "Checkout Completed", {
+      cart_items: cartItems,
+      total: cartTotal,
+      currency: "USD"
+    }]);
   }
 
   showToast("Checkout complete");
@@ -171,25 +204,50 @@ function signIn() {
     return;
   }
 
-  if (typeof rudderanalytics !== "undefined" && rudderanalytics.ready) {
-    rudderanalytics.ready(() => {
+  if (typeof rudderanalytics !== "undefined" && typeof rudderanalytics.identify === "function") {
+    console.log("Identifying user on sign-in", { email });
+    try {
       rudderanalytics.identify(email, {
         email: email,
         signed_in_at: new Date().toISOString()
       });
-    });
+      console.log("Identify event sent to RudderStack for sign-in");
+    } catch (error) {
+      console.error("Error sending identify event for sign-in to RudderStack", error);
+    }
+  } else {
+    console.log("RudderStack SDK not loaded. Queuing identify event for sign-in");
+    console.log("Current RudderStack queue", window.rudderanalytics);
+    window.rudderanalytics = window.rudderanalytics || [];
+    window.rudderanalytics.push(["identify", email, {
+      email: email,
+      signed_in_at: new Date().toISOString()
+    }]);
   }
 
+  localStorage.setItem("userEmail", email);
   toggleSignIn();
   updateToSignOutButton();
 }
 
 function signOut() {
-  if (typeof rudderanalytics !== "undefined" && rudderanalytics.reset) {
-    rudderanalytics.ready(() => {
+  if (typeof rudderanalytics !== "undefined" && typeof rudderanalytics.reset === "function") {
+    console.log("Resetting RudderStack user session");
+    try {
       rudderanalytics.reset();
-    });
+      console.log("Reset event sent to RudderStack");
+    } catch (error) {
+      console.error("Error sending reset event to RudderStack", error);
+    }
+  } else {
+    console.log("RudderStack SDK not loaded. Queuing reset event");
+    console.log("Current RudderStack queue", window.rudderanalytics);
+    window.rudderanalytics = window.rudderanalytics || [];
+    window.rudderanalytics.push(["reset"]);
   }
+
+  localStorage.removeItem("userEmail");
+
   showToast("You have signed out.");
   const authSection = document.getElementById("auth-section");
   authSection.innerHTML = '<button onclick="toggleSignIn()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">🔐 Sign In</button>';
@@ -203,16 +261,12 @@ function updateToSignOutButton() {
 function openImageModal(imageUrl) {
   const product = products.find(p => p.image === imageUrl);
   if (product) {
-    if (typeof rudderanalytics !== "undefined" && rudderanalytics.ready) {
-      rudderanalytics.ready(() => {
-        rudderanalytics.track("Product Viewed", {
-          product_id: product.id,
-          name: product.name,
-          price: product.price,
-          currency: "USD"
-        });
-      });
-    }
+    trackEvent("Product Viewed", {
+      product_id: product.id,
+      name: product.name,
+      price: product.price,
+      currency: "USD"
+    });
   }
 
   const modal = document.getElementById("image-modal");

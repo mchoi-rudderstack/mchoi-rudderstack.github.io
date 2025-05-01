@@ -6,32 +6,48 @@
     <title>Disney Shop</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- OneTrust Cookie Consent Notice start -->
+    <!-- RudderStack v3 Snippet -->
+    <script type="text/javascript">
+      !function(){"use strict";window.RudderSnippetVersion="3.0.60";var e="rudderanalytics";window[e]||(window[e]=[])
+      ;var rudderanalytics=window[e];if(Array.isArray(rudderanalytics)){
+      if(true===rudderanalytics.snippetExecuted&&window.console&&console.error){
+      console.error("RudderStack JavaScript SDK snippet included more than once.")}else{rudderanalytics.snippetExecuted=true,
+      window.rudderAnalyticsBuildType="legacy";var sdkBaseUrl="https://cdn.rudderlabs.com";var sdkVersion="v3"
+      ;var sdkFileName="rsa.min.js";var scriptLoadingMode="async"
+      ;var r=["setDefaultInstanceKey","load","ready","page","track","identify","alias","group","reset","setAnonymousId","startSession","endSession","consent"]
+      ;for(var n=0;n<r.length;n++){var t=r[n];rudderanalytics[t]=function(r){return function(){var n
+      ;Array.isArray(window[e])?rudderanalytics.push([r].concat(Array.prototype.slice.call(arguments))):null===(n=window[e][r])||void 0===n||n.apply(window[e],arguments)
+      }}(t)}try{
+      new Function('class Test{field=()=>{};test({prop=[]}={}){return prop?(prop?.property??[...prop]):import("");}}'),
+      window.rudderAnalyticsBuildType="modern"}catch(i){}var d=document.head||document.getElementsByTagName("head")[0]
+      ;var o=document.body||document.getElementsByTagName("body")[0];window.rudderAnalyticsAddScript=function(e,r,n){
+      var t=document.createElement("script");t.src=e,t.setAttribute("data-loader","RS_JS_SDK"),r&&n&&t.setAttribute(r,n),
+      "async"===scriptLoadingMode?t.async=true:"defer"===scriptLoadingMode&&(t.defer=true),
+      d?d.insertBefore(t,d.firstChild):o.insertBefore(t,o.firstChild)},window.rudderAnalyticsMount=function(){!function(){
+      if("undefined"==typeof globalThis){var e;var r=function getGlobal(){
+      return"undefined"!=typeof self?self:"undefined"!=typeof window?window:null}();r&&Object.defineProperty(r,"globalThis",{
+      value:r,configurable:true})}
+      }(),window.rudderAnalyticsAddScript("".concat(sdkBaseUrl,"/").concat(sdkVersion,"/").concat(window.rudderAnalyticsBuildType,"/").concat(sdkFileName),"data-rsa-write-key","2fvYsCyRThc3eqsm1wbjWQffU3m")
+      },
+      "undefined"==typeof Promise||"undefined"==typeof globalThis?window.rudderAnalyticsAddScript("https://polyfill-fastly.io/v3/polyfill.min.js?version=3.111.0&features=Symbol%2CPromise&callback=rudderAnalyticsMount"):window.rudderAnalyticsMount();
+      }}}();
+    </script>
+
+    <!-- OneTrust Cookie Consent Notice -->
     <script type="text/javascript" src="https://cdn.cookielaw.org/consent/7c9b4dc8-bb26-4b56-b89b-e5fac96e61a6/OtAutoBlock.js"></script>
     <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" type="text/javascript" charset="UTF-8" data-domain-script="7c9b4dc8-bb26-4b56-b89b-e5fac96e61a6"></script>
 
     <script>
-      window.rudderanalytics = window.rudderanalytics || [];
-      window.rudderanalytics.methods = [
-        "load", "page", "track", "identify", "alias", "group", "ready", "reset", "getAnonymousId", "setAnonymousId"
-      ];
-      window.rudderanalytics.factory = function (t) {
-        return function () {
-          window.rudderanalytics.push([t].concat(Array.prototype.slice.call(arguments)));
-          return window.rudderanalytics;
-        };
-      };
-      for (var i = 0; i < window.rudderanalytics.methods.length; i++) {
-        var method = window.rudderanalytics.methods[i];
-        window.rudderanalytics[method] = window.rudderanalytics.factory(method);
-      }
-    </script>
+      // Track OptanonWrapper and SDK state
+      let optanonWrapperCallCount = 0;
+      let rudderSdkLoaded = false;
+      let rudderReadyProcessed = false;
 
-    <script>
       function OptanonWrapper() {
-        const writeKey = "2fvYsCyRThc3eqsm1wbjWQffU3m";
-        const dataPlaneUrl = "https://workspacevempc.dataplane.rudderstack.com";
+        optanonWrapperCallCount++;
+        console.log(`OptanonWrapper called (${optanonWrapperCallCount} times)`);
 
+        // Define consent groups
         const consentGroups = {
           targeting: "C0004",
           performance: "C0002",
@@ -41,6 +57,7 @@
           necessary: "C0001"
         };
 
+        // Check active consent categories
         const isCategoryActive = (catId) => {
           return typeof OptanonActiveGroups !== "undefined" && OptanonActiveGroups.indexOf(catId) > -1;
         };
@@ -54,33 +71,87 @@
           necessary: isCategoryActive(consentGroups.necessary)
         };
 
-        const hasTrackingConsent = Object.values(userConsent).some(Boolean);
+        console.log("OptanonWrapper: User Consent", userConsent);
+        console.log("OptanonWrapper: Consent Banner Closed", window.OneTrust ? window.OneTrust.IsAlertBoxClosed() : "OneTrust not loaded");
+        console.log("OptanonWrapper: Analytics Consent (C0007)", userConsent.analytics);
 
-        if (hasTrackingConsent) {
-          rudderanalytics.load(writeKey, dataPlaneUrl);
-
-          rudderanalytics.ready(() => {
-            rudderanalytics.page();
-
-            rudderanalytics.setConsent({
-              consent: userConsent
+        // Load RudderStack SDK only after consent banner is closed
+        if (window.OneTrust && window.OneTrust.IsAlertBoxClosed() && !rudderSdkLoaded) {
+          console.log("OptanonWrapper: Initializing RudderStack SDK after consent");
+          try {
+            rudderanalytics.load('2fvYsCyRThc3eqsm1wbjWQffU3m', 'https://workspacevempc.dataplane.rudderstack.com', {
+              consentManagement: {
+                enabled: true,
+                provider: "oneTrust"
+              }
             });
+            rudderSdkLoaded = true;
+            console.log("OptanonWrapper: RudderStack SDK load called successfully");
+          } catch (error) {
+            console.error("OptanonWrapper: Error loading RudderStack SDK", error);
+          }
 
-            rudderanalytics.addIntegrationOptions &&
-              rudderanalytics.addIntegrationOptions({
-                All: {
-                  consent: userConsent
+          // Register ready callback
+          try {
+            rudderanalytics.ready(() => {
+              if (!rudderReadyProcessed) {
+                console.log("RudderStack SDK is ready");
+                console.log("RudderStack queue before processing", window.rudderanalytics);
+                try {
+                  rudderanalytics.consent({
+                    consent: userConsent
+                  });
+                  rudderanalytics.page();
+                  rudderanalytics.track("User Consent", {
+                    consent: userConsent
+                  });
+                  console.log("RudderStack initial events sent (page, User Consent)");
+                } catch (error) {
+                  console.error("RudderStack ready: Error sending initial events", error);
                 }
-              });
-
-            rudderanalytics.track("User Consent", {
-              consent: userConsent
+                rudderReadyProcessed = true;
+              } else {
+                console.log("RudderStack ready logic already processed, skipping");
+              }
             });
+          } catch (error) {
+            console.error("OptanonWrapper: Error registering ready callback", error);
+          }
+        } else if (!window.OneTrust) {
+          console.warn("OptanonWrapper: OneTrust not loaded, cannot check consent status");
+        } else if (!window.OneTrust.IsAlertBoxClosed()) {
+          console.log("OptanonWrapper: Consent banner still open, delaying SDK load");
+        } else {
+          console.log("OptanonWrapper: RudderStack SDK already loaded, skipping load");
+        }
+
+        // Listen for consent changes
+        if (window.OneTrust && window.OneTrust.OnConsentChanged && rudderSdkLoaded) {
+          window.OneTrust.OnConsentChanged(() => {
+            console.log("OneTrust consent changed", OptanonActiveGroups);
+            const updatedConsent = {
+              targeting: isCategoryActive(consentGroups.targeting),
+              performance: isCategoryActive(consentGroups.performance),
+              functional: isCategoryActive(consentGroups.functional),
+              social_media: isCategoryActive(consentGroups.social_media),
+              analytics: isCategoryActive(consentGroups.analytics),
+              necessary: isCategoryActive(consentGroups.necessary)
+            };
+            console.log("Updating consent", updatedConsent);
+            try {
+              rudderanalytics.consent({
+                consent: updatedConsent
+              });
+              rudderanalytics.track("User Consent", {
+                consent: updatedConsent
+              });
+            } catch (error) {
+              console.error("OneTrust consent changed: Error updating consent", error);
+            }
           });
         }
       }
     </script>
-    <!-- OneTrust Cookie Consent Notice end -->
 
     <script src="app.js" defer></script>
   </head>
@@ -115,40 +186,43 @@
 
     <main class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-8 pb-12" id="product-list"></main>
 
-        
-    </div>
-
     <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-80 hidden flex justify-center items-center z-50">
       <div class="relative">
         <button onclick="closeImageModal()" class="absolute top-2 right-2 text-black text-xl font-bold">
-          &times;
+          ×
         </button>
         <img id="modal-img" src="" class="max-h-[80vh] max-w-[90vw] rounded-lg shadow-lg" />
       </div>
     </div>
 
-    <!-- Force Tailwind to keep this class -->
     <div class="hidden opacity-100"></div>
 
     <div id="toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg opacity-0 transition-opacity duration-300 z-50"></div>
-  
-<div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
-  <div class="bg-white rounded-lg p-6 w-80">
-    <input id="first-name" type="text" placeholder="First Name" class="mt-2 w-full px-2 py-1 text-sm border rounded" />
-    <input id="last-name" type="text" placeholder="Last Name" class="mt-2 w-full px-2 py-1 text-sm border rounded" />
-    <textarea id="delivery-address" placeholder="Delivery Address" class="mt-2 w-full px-2 py-1 text-sm border rounded"></textarea>
-    <ul id="cart-items" class="mt-4 space-y-2"></ul>
-    <p id="total" class="mt-4 font-semibold text-sm">Total: $0.00</p>
-    <div class="pb-24">
-      <button class="mt-4 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800" onclick="checkout()">
-        Checkout
-      </button>
-      <button class="mt-2 text-sm text-red-600 underline" onclick="toggleCart()">
-        Close
-      </button>
-    </div>
-  </div>
-</div>
 
-</body>
+    <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
+      <div class="bg-white rounded-lg p-6 w-80">
+        <input id="first-name" type="text" placeholder="First Name" class="mt-2 w-full px-2 py-1 text-sm border rounded" />
+        <input id="last-name" type="text" placeholder="Last Name" class="mt-2 w-full px-2 py-1 text-sm border rounded" />
+        <textarea id="delivery-address" placeholder="Delivery Address" class="mt-2 w-full px-2 py-1 text-sm border rounded"></textarea>
+        <ul id="cart-items" class="mt-4 space-y-2"></ul>
+        <p id="total" class="mt-4 font-semibold text-sm">Total: $0.00</p>
+        <div class="pb-24">
+          <button class="mt-4 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800" onclick="checkout()">
+            Checkout
+          </button>
+          <button class="mt-2 text-sm text-red-600 underline" onclick="toggleCart()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cloudflare Challenge Script (Commented Out for Local Development) -->
+    <!--
+    <script>
+      (function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93926e5e1bb2b0db',t:'MTc0NjEzNTU2Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
+    </script>
+    -->
+    <!-- Re-enable the Cloudflare script above when deploying to a Cloudflare-hosted environment -->
+  </body>
 </html>

@@ -40,21 +40,17 @@
 </head>
 <body class="bg-gradient-to-b from-blue-200 to-white min-h-screen relative">
 
-<!-- rest of your body remains unchanged -->
-
   <header class="text-center py-10">
     <h1 class="text-5xl font-bold text-blue-900">Disney Shop</h1>
     <p class="text-lg mt-2">Magical merch for every fan</p>
     <button id="cart-btn" class="mt-4 bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800">🛒 View Cart</button>
   </header>
 
-  <!-- Sign-In Button -->
   <div id="auth-section" class="absolute top-4 right-4">
     <button onclick="toggleSignIn()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">🔐 Sign In</button>
   </div>
 
-  <!-- Sign-In Modal -->
-  <div id="signin-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+  <div id="signin-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
     <div class="bg-white rounded-lg p-6 w-80">
       <h2 class="text-xl font-bold mb-4">Sign In</h2>
       <input id="email" type="email" placeholder="Email" class="w-full px-3 py-2 border rounded mb-4" />
@@ -66,8 +62,7 @@
 
   <main class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-8 pb-12" id="product-list"></main>
 
-  <!-- Cart Modal -->
-  <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+  <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
     <div class="bg-white rounded-lg p-6 w-96">
       <h2 class="text-xl font-bold mb-4">Your Cart</h2>
       <ul id="cart-items" class="space-y-2"></ul>
@@ -77,14 +72,17 @@
     </div>
   </div>
 
-  <!-- Image Modal -->
-  <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-80 hidden justify-center items-center z-50">
+  <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-80 hidden flex justify-center items-center z-50">
     <div class="relative">
       <button onclick="closeImageModal()" class="absolute top-2 right-2 text-white text-xl font-bold">&times;</button>
       <img id="modal-img" src="" class="max-h-[80vh] max-w-[90vw] rounded-lg shadow-lg" />
     </div>
   </div>
 
+  <!-- Force Tailwind to keep this class -->
+  <div class="hidden opacity-100"></div>
+
+  <div id="toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg opacity-0 transition-opacity duration-300 z-50"></div>
+
 </body>
 </html>
-

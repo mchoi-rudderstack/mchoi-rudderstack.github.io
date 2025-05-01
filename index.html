@@ -28,7 +28,9 @@
       console.log("OneTrust OptanonWrapper triggered");
       if (typeof OptanonActiveGroups !== "undefined") {
         console.log("Active Groups:", OptanonActiveGroups);
-        if (OptanonActiveGroups.indexOf("C0002") > -1) {
+        const consentCategories = ["C0001", "C0002", "C0003", "C0004", "C0005", "C0007"];
+        const hasConsent = consentCategories.some(cat => OptanonActiveGroups.indexOf(cat) > -1);
+        if (hasConsent) {
           loadRudder();
         }
       }

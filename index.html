@@ -9,31 +9,60 @@
   <!-- OneTrust Cookie Consent Notice start -->
   <script type="text/javascript" src="https://cdn.cookielaw.org/consent/7c9b4dc8-bb26-4b56-b89b-e5fac96e61a6/OtAutoBlock.js"></script>
   <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" type="text/javascript" charset="UTF-8" data-domain-script="7c9b4dc8-bb26-4b56-b89b-e5fac96e61a6"></script>
-  <script>
-    function loadRudder() {
-      console.log("Loading RudderStack...");
-      var rudderScript = document.createElement("script");
-      rudderScript.src = "https://cdn.rudderlabs.com/v3/modern/rsa.min.js";
-      rudderScript.async = true;
-      rudderScript.setAttribute("data-loader", "RS_JS_SDK");
-      rudderScript.setAttribute("data-rsa-write-key", "2fvYsCyRThc3eqsm1wbjWQffU3m");
-      rudderScript.onload = function() {
-        window.rudderanalytics = window.rudderanalytics || [];
-        rudderanalytics.load("2fvYsCyRThc3eqsm1wbjWQffU3m", "https://workspacevempc.dataplane.rudderstack.com");
-      };
-      document.head.appendChild(rudderScript);
-    }
 
+  <script>
+    window.rudderanalytics = window.rudderanalytics || [];
+    window.rudderanalytics.methods = [
+      "load", "page", "track", "identify", "alias", "group", "ready", "reset", "getAnonymousId", "setAnonymousId"
+    ];
+    window.rudderanalytics.factory = function (t) {
+      return function () {
+        window.rudderanalytics.push([t].concat(Array.prototype.slice.call(arguments)));
+        return window.rudderanalytics;
+      };
+    };
+    for (var i = 0; i < window.rudderanalytics.methods.length; i++) {
+      var method = window.rudderanalytics.methods[i];
+      window.rudderanalytics[method] = window.rudderanalytics.factory(method);
+    }
+  </script>
+
+  <script>
     function OptanonWrapper() {
-      console.log("OneTrust OptanonWrapper triggered");
-      if (typeof OptanonActiveGroups !== "undefined") {
-        console.log("Active Groups:", OptanonActiveGroups);
-        const consentCategories = ["C0001", "C0002", "C0003", "C0004", "C0005", "C0007"];
-        const hasConsent = consentCategories.some(cat => OptanonActiveGroups.indexOf(cat) > -1);
-        if (hasConsent) {
-          loadRudder();
+      const writeKey = "2fvYsCyRThc3eqsm1wbjWQffU3m";
+      const dataPlaneUrl = "https://workspacevempc.dataplane.rudderstack.com";
+
+      const consentGroups = {
+        targeting: "C0004",
+        performance: "C0002",
+        functional: "C0003",
+        social_media: "C0005",
+        analytics: "C0007",
+        necessary: "C0001"
+      };
+
+      const isCategoryActive = (catId) => {
+        return typeof OptanonActiveGroups !== "undefined" && OptanonActiveGroups.indexOf(catId) > -1;
+      };
+
+      const userConsent = {
+        targeting: isCategoryActive(consentGroups.targeting),
+        performance: isCategoryActive(consentGroups.performance),
+        functional: isCategoryActive(consentGroups.functional),
+        social_media: isCategoryActive(consentGroups.social_media),
+        analytics: isCategoryActive(consentGroups.analytics),
+        necessary: isCategoryActive(consentGroups.necessary)
+      };
+
+      rudderanalytics.load(writeKey, dataPlaneUrl, {
+        configUrl: "https://cdn.rudderlabs.com",
+        consentConfig: {
+          oneTrust: {
+            enabled: true,
+            userConsent
+          }
         }
-      }
+      });
     }
   </script>
   <!-- OneTrust Cookie Consent Notice end -->

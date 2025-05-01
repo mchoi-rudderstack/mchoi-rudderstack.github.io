@@ -21,6 +21,10 @@ const products = [
 
 const cart = [];
 
+const firstName = document.getElementById("first-name").value.trim();
+const lastName = document.getElementById("last-name").value.trim();
+const address = document.getElementById("delivery-address").value.trim();
+
 document.addEventListener("DOMContentLoaded", () => {
   const productList = document.getElementById("product-list");
 
@@ -141,7 +145,10 @@ function checkout() {
       rudderanalytics.track("Checkout Completed", {
         cart_items: cartItems,
         total: cartTotal,
-        currency: "USD"
+        currency: "USD",
+        first_name: firstName,
+        last_name: lastName,
+        address: address
       });
     });
   }

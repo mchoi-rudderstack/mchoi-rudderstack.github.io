@@ -54,14 +54,22 @@
         necessary: isCategoryActive(consentGroups.necessary)
       };
 
-      rudderanalytics.load(writeKey, dataPlaneUrl, {
-        configUrl: "https://cdn.rudderlabs.com",
-        consentConfig: {
-          oneTrust: {
-            enabled: true,
-            userConsent
-          }
-        }
+      rudderanalytics.load($1);
+
+      rudderanalytics.ready(() => {
+        rudderanalytics.setConsent({
+          consent: userConsent
+        });
+
+        rudderanalytics.track("User Consent", {
+          consent: userConsent
+        });
+      });
+
+      rudderanalytics.ready(() => {
+        rudderanalytics.track("User Consent", {
+          consent: userConsent
+        });
       });
     }
   </script>

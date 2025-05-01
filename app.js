@@ -65,7 +65,12 @@ function trackEvent(eventName, properties) {
     console.log(`Tracking event: ${eventName}`, properties);
     try {
       rudderanalytics.track(eventName, properties);
+      rudderanalytics.flush();
       console.log(`Event sent to RudderStack: ${eventName}`);
+      console.log("RudderStack queue after track", window.rudderanalytics);
+      if (typeof rudderanalytics.getState === "function") {
+        console.log("RudderStack SDK state", rudderanalytics.getState());
+      }
     } catch (error) {
       console.error(`Error sending event to RudderStack: ${eventName}`, error);
     }
@@ -160,7 +165,12 @@ function checkout() {
         last_name: lastName,
         delivery_address: deliveryAddress
       });
+      rudderanalytics.flush();
       console.log("Identify event sent to RudderStack");
+      console.log("RudderStack queue after identify", window.rudderanalytics);
+      if (typeof rudderanalytics.getState === "function") {
+        console.log("RudderStack SDK state", rudderanalytics.getState());
+      }
     } catch (error) {
       console.error("Error sending identify event to RudderStack", error);
     }
@@ -168,7 +178,10 @@ function checkout() {
     trackEvent("Checkout Completed", {
       cart_items: cartItems,
       total: cartTotal,
-      currency: "USD"
+      currency: "USD",
+      first_name: firstName,
+      last_name: lastName,
+      delivery_address: deliveryAddress
     });
   } else {
     console.log("RudderStack SDK not loaded. Queuing identify and checkout events");
@@ -182,7 +195,10 @@ function checkout() {
     window.rudderanalytics.push(["track", "Checkout Completed", {
       cart_items: cartItems,
       total: cartTotal,
-      currency: "USD"
+      currency: "USD",
+      first_name: firstName,
+      last_name: lastName,
+      delivery_address: deliveryAddress
     }]);
   }
 
@@ -211,7 +227,12 @@ function signIn() {
         email: email,
         signed_in_at: new Date().toISOString()
       });
+      rudderanalytics.flush();
       console.log("Identify event sent to RudderStack for sign-in");
+      console.log("RudderStack queue after identify", window.rudderanalytics);
+      if (typeof rudderanalytics.getState === "function") {
+        console.log("RudderStack SDK state", rudderanalytics.getState());
+      }
     } catch (error) {
       console.error("Error sending identify event for sign-in to RudderStack", error);
     }
@@ -235,7 +256,12 @@ function signOut() {
     console.log("Resetting RudderStack user session");
     try {
       rudderanalytics.reset();
+      rudderanalytics.flush();
       console.log("Reset event sent to RudderStack");
+      console.log("RudderStack queue after reset", window.rudderanalytics);
+      if (typeof rudderanalytics.getState === "function") {
+        console.log("RudderStack SDK state", rudderanalytics.getState());
+      }
     } catch (error) {
       console.error("Error sending reset event to RudderStack", error);
     }

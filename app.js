@@ -21,6 +21,14 @@ const products = [
 
 const cart = [];
 
+async function hashEmailSHA256(email) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(email.trim().toLowerCase());
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const productList = document.getElementById("product-list");
 
@@ -59,7 +67,6 @@ function showToast(message) {
   }, 2000);
 }
 
-// Helper function to track RudderStack events with logging
 function trackEvent(eventName, properties) {
   if (typeof rudderanalytics !== "undefined" && typeof rudderanalytics.track === "function") {
     console.log(`Tracking event: ${eventName}`, properties);
@@ -203,7 +210,6 @@ async function checkout() {
   toggleCart();
 }
 
-
 function toggleSignIn() {
   document.getElementById("signin-modal").classList.toggle("hidden");
 }
@@ -245,7 +251,6 @@ async function signIn() {
   updateToSignOutButton();
 }
 
-
 function signOut() {
   if (typeof rudderanalytics !== "undefined" && typeof rudderanalytics.reset === "function") {
     console.log("Resetting RudderStack user session");
@@ -262,7 +267,6 @@ function signOut() {
     }
   } else {
     console.log("RudderStack SDK not loaded. Queuing reset event");
-    console.log("Current RudderStack queue", window.rudderanalytics);
     window.rudderanalytics = window.rudderanalytics || [];
     window.rudderanalytics.push(["reset"]);
   }

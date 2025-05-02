@@ -175,7 +175,7 @@ async function checkout() {
           last_name: lastName,
           delivery_address: deliveryAddress
         });
-        rudderanalytics.flush();
+        // rudderanalytics.flush();
         console.log("Identify event sent to RudderStack during checkout");
       }
 

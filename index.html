@@ -101,11 +101,11 @@
                   rudderanalytics.consent({
                     consent: userConsent
                   });
-                  rudderanalytics.page();
-                  rudderanalytics.track("User Consent", {
-                    consent: userConsent
-                  });
-                  console.log("RudderStack initial events sent (page, User Consent)");
+                  rudderanalytics.track("View Main Page");
+                  // rudderanalytics.track("User Consent", {
+                  //   consent: userConsent
+                  // });
+                  // console.log("RudderStack initial events sent (page, User Consent)");
                 } catch (error) {
                   console.error("RudderStack ready: Error sending initial events", error);
                 }
@@ -131,7 +131,7 @@
             console.log("OneTrust consent changed", OptanonActiveGroups);
             const updatedConsent = {
               targeting: isCategoryActive(consentGroups.targeting),
-              performance: isCategoryActive(consentGroups.performance),
+              // performance: isCategoryActive(consentGroups.performance),
               functional: isCategoryActive(consentGroups.functional),
               social_media: isCategoryActive(consentGroups.social_media),
               analytics: isCategoryActive(consentGroups.analytics),
@@ -142,9 +142,9 @@
               rudderanalytics.consent({
                 consent: updatedConsent
               });
-              rudderanalytics.track("User Consent", {
-                consent: updatedConsent
-              });
+              // rudderanalytics.track("User Consent", {
+              //   consent: updatedConsent
+              // });
             } catch (error) {
               console.error("OneTrust consent changed: Error updating consent", error);
             }

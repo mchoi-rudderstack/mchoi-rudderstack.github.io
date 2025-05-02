@@ -184,7 +184,7 @@ function checkout() {
         traits: {
           first_name: firstName,
           last_name: lastName,
-          delivery_address: delioveryAddress
+          delivery_address: deliveryAddress
         }
       }
     });
@@ -192,11 +192,11 @@ function checkout() {
     console.log("RudderStack SDK not loaded. Queuing identify and checkout events");
     console.log("Current RudderStack queue", window.rudderanalytics);
     window.rudderanalytics = window.rudderanalytics || [];
-    window.rudderanalytics.push(["identify", email, {
-      first_name: firstName,
-      last_name: lastName,
-      delivery_address: deliveryAddress
-    }]);
+    // window.rudderanalytics.push(["identify", email, {
+    //   first_name: firstName,
+    //   last_name: lastName,
+    //   delivery_address: deliveryAddress
+    // }]);
     window.rudderanalytics.push(["track", "Checkout Completed", {
       cart_items: cartItems,
       total: cartTotal,

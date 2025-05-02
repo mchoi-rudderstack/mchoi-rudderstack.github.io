@@ -200,10 +200,7 @@ function checkout() {
     window.rudderanalytics.push(["track", "Checkout Completed", {
       cart_items: cartItems,
       total: cartTotal,
-      currency: "USD",
-      first_name: firstName,
-      last_name: lastName,
-      delivery_address: deliveryAddress
+      currency: "USD"
     }]);
   }
 

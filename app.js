@@ -201,6 +201,14 @@ function checkout() {
       cart_items: cartItems,
       total: cartTotal,
       currency: "USD"
+    }, {
+      context: {
+        traits: {
+          first_name: firstName,
+          last_name: lastName,
+          delivery_address: deliveryAddress
+        }
+      }
     }]);
   }
 

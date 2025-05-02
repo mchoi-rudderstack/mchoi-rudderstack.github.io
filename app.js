@@ -157,58 +157,42 @@ function checkout() {
   }));
 
   if (typeof rudderanalytics !== "undefined" && typeof rudderanalytics.identify === "function") {
-    // const email = localStorage.getItem("userEmail") || undefined;
-    // console.log("Identifying user", { email, firstName, lastName, deliveryAddress });
-    // try {
-    //   rudderanalytics.identify(email, {
-    //     first_name: firstName,
-    //     last_name: lastName,
-    //     delivery_address: deliveryAddress
-    //   });
-    //   rudderanalytics.flush();
-    //   console.log("Identify event sent to RudderStack");
-    //   console.log("RudderStack queue after identify", window.rudderanalytics);
-    //   if (typeof rudderanalytics.getState === "function") {
-    //     console.log("RudderStack SDK state", rudderanalytics.getState());
-    //   }
-    // } catch (error) {
-    //   console.error("Error sending identify event to RudderStack", error);
-    // }
+    const email = localStorage.getItem("userEmail") || undefined;
+    console.log("Identifying user", { email, firstName, lastName, deliveryAddress });
+    try {
+      rudderanalytics.identify(email, {
+        first_name: firstName,
+        last_name: lastName,
+        delivery_address: deliveryAddress
+      });
+      rudderanalytics.flush();
+      console.log("Identify event sent to RudderStack");
+      console.log("RudderStack queue after identify", window.rudderanalytics);
+      if (typeof rudderanalytics.getState === "function") {
+        console.log("RudderStack SDK state", rudderanalytics.getState());
+      }
+    } catch (error) {
+      console.error("Error sending identify event to RudderStack", error);
+    }
 
     trackEvent("Checkout Completed", {
       cart_items: cartItems,
       total: cartTotal,
       currency: "USD"
-    }, {
-      context: {
-        traits: {
-          first_name: firstName,
-          last_name: lastName,
-          delivery_address: deliveryAddress
-        }
-      }
     });
   } else {
     console.log("RudderStack SDK not loaded. Queuing identify and checkout events");
     console.log("Current RudderStack queue", window.rudderanalytics);
     window.rudderanalytics = window.rudderanalytics || [];
-    // window.rudderanalytics.push(["identify", email, {
-    //   first_name: firstName,
-    //   last_name: lastName,
-    //   delivery_address: deliveryAddress
-    // }]);
+    window.rudderanalytics.push(["identify", email, {
+      first_name: firstName,
+      last_name: lastName,
+      delivery_address: deliveryAddress
+    }]);
     window.rudderanalytics.push(["track", "Checkout Completed", {
       cart_items: cartItems,
       total: cartTotal,
       currency: "USD"
-    }, {
-      context: {
-        traits: {
-          first_name: firstName,
-          last_name: lastName,
-          delivery_address: deliveryAddress
-        }
-      }
     }]);
   }
 

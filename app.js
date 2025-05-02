@@ -72,7 +72,7 @@ function trackEvent(eventName, properties) {
     console.log(`Tracking event: ${eventName}`, properties);
     try {
       rudderanalytics.track(eventName, properties);
-      rudderanalytics.flush();
+      // rudderanalytics.flush();
       console.log(`Event sent to RudderStack: ${eventName}`);
       console.log("RudderStack queue after track", window.rudderanalytics);
       if (typeof rudderanalytics.getState === "function") {

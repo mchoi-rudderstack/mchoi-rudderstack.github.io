@@ -143,7 +143,7 @@ function renderCart() {
   document.getElementById("total").textContent = `Total: $${total.toFixed(2)}`;
 }
 
-function checkout() {
+async function checkout() {
   const firstName = document.getElementById("first-name").value.trim();
   const lastName = document.getElementById("last-name").value.trim();
   const deliveryAddress = document.getElementById("delivery-address").value.trim();
@@ -156,39 +156,41 @@ function checkout() {
     quantity: item.qty
   }));
 
-  if (typeof rudderanalytics !== "undefined" && typeof rudderanalytics.identify === "function") {
-    const email = localStorage.getItem("userEmail") || undefined;
-    console.log("Identifying user", { email, firstName, lastName, deliveryAddress });
+  const email = localStorage.getItem("userEmail") || undefined;
+  const hashedEmail = email ? await hashEmailSHA256(email) : undefined;
+
+  if (typeof rudderanalytics !== "undefined") {
     try {
-      rudderanalytics.identify(email, {
+      if (typeof rudderanalytics.identify === "function" && email && hashedEmail) {
+        rudderanalytics.identify(hashedEmail, {
+          email: email,
+          first_name: firstName,
+          last_name: lastName,
+          delivery_address: deliveryAddress
+        });
+        rudderanalytics.flush();
+        console.log("Identify event sent to RudderStack during checkout");
+      }
+
+      trackEvent("Checkout Completed", {
+        cart_items: cartItems,
+        total: cartTotal,
+        currency: "USD"
+      });
+    } catch (error) {
+      console.error("Error during identify or track in checkout", error);
+    }
+  } else {
+    console.log("RudderStack SDK not loaded. Queuing events for checkout");
+    window.rudderanalytics = window.rudderanalytics || [];
+    if (email && hashedEmail) {
+      window.rudderanalytics.push(["identify", hashedEmail, {
+        email: email,
         first_name: firstName,
         last_name: lastName,
         delivery_address: deliveryAddress
-      });
-      rudderanalytics.flush();
-      console.log("Identify event sent to RudderStack");
-      console.log("RudderStack queue after identify", window.rudderanalytics);
-      if (typeof rudderanalytics.getState === "function") {
-        console.log("RudderStack SDK state", rudderanalytics.getState());
-      }
-    } catch (error) {
-      console.error("Error sending identify event to RudderStack", error);
+      }]);
     }
-
-    trackEvent("Checkout Completed", {
-      cart_items: cartItems,
-      total: cartTotal,
-      currency: "USD"
-    });
-  } else {
-    console.log("RudderStack SDK not loaded. Queuing identify and checkout events");
-    console.log("Current RudderStack queue", window.rudderanalytics);
-    window.rudderanalytics = window.rudderanalytics || [];
-    window.rudderanalytics.push(["identify", email, {
-      first_name: firstName,
-      last_name: lastName,
-      delivery_address: deliveryAddress
-    }]);
     window.rudderanalytics.push(["track", "Checkout Completed", {
       cart_items: cartItems,
       total: cartTotal,
@@ -201,11 +203,12 @@ function checkout() {
   toggleCart();
 }
 
+
 function toggleSignIn() {
   document.getElementById("signin-modal").classList.toggle("hidden");
 }
 
-function signIn() {
+async function signIn() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
 
@@ -214,26 +217,24 @@ function signIn() {
     return;
   }
 
+  const hashedEmail = await hashEmailSHA256(email);
+
   if (typeof rudderanalytics !== "undefined" && typeof rudderanalytics.identify === "function") {
-    console.log("Identifying user on sign-in", { email });
+    console.log("Identifying user on sign-in", { email, hashedEmail });
     try {
-      rudderanalytics.identify(email, {
-        email: email
+      rudderanalytics.identify(hashedEmail, {
+        email: email,
+        signed_in_at: new Date().toISOString()
       });
       rudderanalytics.flush();
       console.log("Identify event sent to RudderStack for sign-in");
-      console.log("RudderStack queue after identify", window.rudderanalytics);
-      if (typeof rudderanalytics.getState === "function") {
-        console.log("RudderStack SDK state", rudderanalytics.getState());
-      }
     } catch (error) {
       console.error("Error sending identify event for sign-in to RudderStack", error);
     }
   } else {
     console.log("RudderStack SDK not loaded. Queuing identify event for sign-in");
-    console.log("Current RudderStack queue", window.rudderanalytics);
     window.rudderanalytics = window.rudderanalytics || [];
-    window.rudderanalytics.push(["identify", email, {
+    window.rudderanalytics.push(["identify", hashedEmail, {
       email: email,
       signed_in_at: new Date().toISOString()
     }]);
@@ -243,6 +244,7 @@ function signIn() {
   toggleSignIn();
   updateToSignOutButton();
 }
+
 
 function signOut() {
   if (typeof rudderanalytics !== "undefined" && typeof rudderanalytics.reset === "function") {

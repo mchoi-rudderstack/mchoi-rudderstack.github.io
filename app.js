@@ -230,7 +230,6 @@ async function signIn() {
     try {
       rudderanalytics.identify(hashedEmail, {
         email: email,
-        signed_in_at: new Date().toISOString()
       });
       rudderanalytics.flush();
       console.log("Identify event sent to RudderStack for sign-in");

@@ -27,7 +27,7 @@
       if("undefined"==typeof globalThis){var e;var r=function getGlobal(){
       return"undefined"!=typeof self?self:"undefined"!=typeof window?window:null}();r&&Object.defineProperty(r,"globalThis",{
       value:r,configurable:true})}
-      }(),window.rudderAnalyticsAddScript("".concat(sdkBaseUrl,"/").concat(sdkVersion,"/").concat(window.rudderAnalyticsBuildType,"/").concat(sdkFileName),"data-rsa-write-key","2fvYsCyRThc3eqsm1wbjWQffU3m")
+      }(),window.rudderAnalyticsAddScript("".concat(sdkBaseUrl,"/").concat(sdkVersion,"/").concat(window.rudderAnalyticsBuildType,"/").concat(sdkFileName),"data-rsa-write-key","38J7rvCii7TWqSXvjhEvXzQmPY5")
       },
       "undefined"==typeof Promise||"undefined"==typeof globalThis?window.rudderAnalyticsAddScript("https://polyfill-fastly.io/v3/polyfill.min.js?version=3.111.0&features=Symbol%2CPromise&callback=rudderAnalyticsMount"):window.rudderAnalyticsMount();
       }}}();
@@ -79,7 +79,7 @@
         if (window.OneTrust && window.OneTrust.IsAlertBoxClosed() && !rudderSdkLoaded) {
           console.log("OptanonWrapper: Initializing RudderStack SDK after consent");
           try {
-            rudderanalytics.load('2fvYsCyRThc3eqsm1wbjWQffU3m', 'https://workspacevempc.dataplane.rudderstack.com', {
+            rudderanalytics.load('38J7rvCii7TWqSXvjhEvXzQmPY5', 'https://rudderstacodk.dataplane.rudderstack.com', {
               consentManagement: {
                 enabled: true,
                 provider: "oneTrust"

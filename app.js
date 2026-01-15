@@ -1,21 +1,21 @@
 const products = [
   {
     id: 1,
-    name: "Mickey Mouse Hoodie",
+    name: "OpenAI Arch Crewneck",
     price: 49.99,
-    image: "https://cdn-ssl.s7.shopdisney.com/is/image/DisneyShopping/2400107790627?fmt=webp&qlt=70&wid=608&hei=608"
+    image: "./crewneck.png"
   },
   {
     id: 2,
-    name: "Frozen Elsa Doll",
+    name: "GPT-5 Collectible Card",
     price: 29.99,
-    image: "https://cdn-ssl.s7.shopdisney.com/is/image/DisneyShopping/1612040900162?fmt=webp&qlt=70&wid=1280&hei=1280"
+    image: "./card.png"
   },
   {
     id: 3,
-    name: "Marvel Avengers T-Shirt",
+    name: "Blossom Dinner Plate",
     price: 24.99,
-    image: "https://cdn-ssl.s7.shopdisney.com/is/image/DisneyShopping/2412048020764?fmt=webp&qlt=70&wid=1280&hei=1280"
+    image: "./plate.png"
   }
 ];
 
@@ -72,7 +72,6 @@ function trackEvent(eventName, properties) {
     console.log(`Tracking event: ${eventName}`, properties);
     try {
       rudderanalytics.track(eventName, properties);
-      // rudderanalytics.flush();
       console.log(`Event sent to RudderStack: ${eventName}`);
       console.log("RudderStack queue after track", window.rudderanalytics);
       if (typeof rudderanalytics.getState === "function") {

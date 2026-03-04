@@ -1,21 +1,21 @@
 const products = [
   {
     id: 1,
-    name: "OpenAI Arch Crewneck",
+    name: "Puffer Jacket",
     price: 49.99,
-    image: "./crewneck.png"
+    image: "./puffer.png"
   },
   {
     id: 2,
-    name: "GPT-5 Collectible Card",
+    name: "Plain Henley",
     price: 29.99,
-    image: "./card.png"
+    image: "./tee.png"
   },
   {
     id: 3,
-    name: "Blossom Dinner Plate",
+    name: "Blue Jeans",
     price: 24.99,
-    image: "./plate.png"
+    image: "./jeans.png"
   }
 ];
 

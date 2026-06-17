@@ -21,6 +21,11 @@ const products = [
 
 const cart = [];
 
+// Tracks which checkout fields have been started in the current cart session.
+// Cleared each time the cart modal is opened so each new checkout attempt
+// fires fresh field events.
+const checkoutFieldsStarted = new Set();
+
 async function hashEmailSHA256(email) {
   const encoder = new TextEncoder();
   const data = encoder.encode(email.trim().toLowerCase());
@@ -51,6 +56,27 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("image-modal").addEventListener("click", (e) => {
     if (e.target.id === "image-modal") {
       closeImageModal();
+    }
+  });
+
+  // Attach focus listeners to checkout form fields.
+  // Each fires "Checkout Field Started" at most once per cart session
+  // (session resets when the cart modal is opened via toggleCart).
+  const checkoutFields = [
+    { id: "first-name",        field_name: "first_name" },
+    { id: "last-name",         field_name: "last_name" },
+    { id: "delivery-address",  field_name: "delivery_address" }
+  ];
+
+  checkoutFields.forEach(({ id, field_name }) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("focus", () => {
+        if (!checkoutFieldsStarted.has(id)) {
+          checkoutFieldsStarted.add(id);
+          trackEvent("Checkout Field Started", { field_name });
+        }
+      });
     }
   });
 });
@@ -114,6 +140,9 @@ function toggleCart() {
   modal.classList.toggle("hidden");
 
   if (!modal.classList.contains("hidden")) {
+    // Reset field-started tracking for each new cart session
+    checkoutFieldsStarted.clear();
+
     trackEvent("Cart Viewed", {
       cart_items: cart.map(item => ({
         product_id: item.id,

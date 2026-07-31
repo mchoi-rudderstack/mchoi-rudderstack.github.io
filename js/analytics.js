@@ -89,6 +89,16 @@ function trackProductViewed(product_name) {
   rsLog("product_viewed", props);
 }
 
+function trackProductShared(product, shareMethod) {
+  const props = {
+    product_name: product.name,
+    sku: product.sku,
+    share_method: shareMethod
+  };
+  withRudder((rs) => rs.track("product_shared", props));
+  rsLog("product_shared", props);
+}
+
 function trackOrderCompleted(order) {
   withRudder((rs) => rs.track("order_completed", order));
   rsLog("order_completed", order);

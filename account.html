@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>My Account — HaloHome</title>
+<link rel="stylesheet" href="css/style.css" />
+<script src="js/rudder-config.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html">Halo<span class="dot">Home</span></a>
+    <nav class="main-nav">
+      <a href="index.html">Shop</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn-ghost-light" id="logout-btn" style="cursor:pointer;">Log Out</button>
+      <a class="cart-link" href="cart.html">🛒<span class="cart-badge" id="cart-count">0</span></a>
+    </div>
+  </div>
+</header>
+
+<div class="container" id="account-root"></div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/products.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  const email = localStorage.getItem("halo_user_email");
+  const root = document.getElementById("account-root");
+
+  if (!email) {
+    location.href = "login.html";
+  } else {
+    const profile = JSON.parse(localStorage.getItem("halo_profile") || "{}");
+    const orders = JSON.parse(localStorage.getItem("halo_orders") || "[]");
+    const eligibleDevices = PRODUCTS.filter((p) => p.hasLiveDemo);
+    const subs = JSON.parse(localStorage.getItem("halo_subscriptions") || "{}");
+
+    root.innerHTML = `
+      <h1>My Account</h1>
+      <p style="color:var(--muted); margin-top:-10px;">Signed in as ${email}</p>
+
+      <div class="account-grid">
+        <div class="panel">
+          <h2>Profile</h2>
+          <form id="profile-form">
+            <div class="field"><label>Username *</label><input required id="username" value="${profile.username || ""}" /></div>
+            <div class="form-grid-2">
+              <div class="field"><label>State</label><input id="state" maxlength="2" placeholder="CA" value="${profile.state || ""}" /></div>
+              <div class="field"><label>ZIP code</label><input id="zipcode" value="${profile.zipcode || ""}" /></div>
+            </div>
+            <button class="btn" type="submit">Save Profile</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h2>Order History</h2>
+          ${orders.length === 0 ? '<p style="color:var(--muted);">No orders yet.</p>' : orders.map((o) => `
+            <div class="order-row">
+              <strong>${o.order_number}</strong> — ${new Date(o.order_date).toLocaleDateString()}<br/>
+              ${o.items.map((i) => `${i.name} × ${i.qty}`).join(", ")}<br/>
+              Total: ${formatPrice(o.total)}
+            </div>
+          `).join("")}
+        </div>
+
+        <div class="panel" style="grid-column: 1 / -1;">
+          <h2>Cam Plus Subscriptions</h2>
+          <p style="color:var(--muted); font-size:13px; margin-top:-8px;">Cloud recording plans for your camera-equipped devices.</p>
+          <div id="devices-list"></div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("devices-list").innerHTML = eligibleDevices.map((d) => {
+      const sub = subs[d.sku];
+      return `
+        <div class="device-row">
+          <div>
+            <strong>${d.icon} ${d.name}</strong>
+            <div class="meta">${sub ? `Plan: ${sub.plan} — since ${new Date(sub.since).toLocaleDateString()}` : "No active plan"}</div>
+          </div>
+          <div class="sub-actions">
+            <select data-plan-for="${d.sku}">
+              <option value="cam_plus_lite">Cam Plus Lite — $1.99/mo</option>
+              <option value="cam_plus_standard">Cam Plus Standard — $2.99/mo</option>
+              <option value="cam_plus_pro">Cam Plus Pro — $4.99/mo</option>
+            </select>
+            <button data-action="start" data-sku="${d.sku}">Subscribe</button>
+            <button data-action="renew" data-sku="${d.sku}">Renew</button>
+            <button data-action="upgrade" data-sku="${d.sku}">Upgrade</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    const planPrices = { cam_plus_lite: 1.99, cam_plus_standard: 2.99, cam_plus_pro: 4.99 };
+
+    document.getElementById("devices-list").querySelectorAll("[data-action]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const sku = btn.dataset.sku;
+        const action = btn.dataset.action;
+        const select = document.querySelector(`[data-plan-for="${sku}"]`);
+        const subscription_type = select.value;
+        const props = {
+          device_id: sku,
+          invoice_amount: planPrices[subscription_type],
+          invoice_date: new Date().toISOString(),
+          shopify_customer_id: shopifyCustomerId,
+          subscription_type
+        };
+
+        if (action === "start") trackSubscriptionStart(props);
+        if (action === "renew") trackSubscriptionRenewal(props);
+        if (action === "upgrade") trackSubscriptionUpgrade(props);
+
+        const subs = JSON.parse(localStorage.getItem("halo_subscriptions") || "{}");
+        subs[sku] = { plan: subscription_type, since: props.invoice_date };
+        localStorage.setItem("halo_subscriptions", JSON.stringify(subs));
+
+        showToast(`${action === "start" ? "Subscribed" : action === "renew" ? "Renewed" : "Upgraded"} plan for ${sku}`);
+      });
+    });
+
+    document.getElementById("profile-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const state = document.getElementById("state").value;
+      const zipcode = document.getElementById("zipcode").value;
+
+      trackAccountUpdated({ username, state, zipcode });
+      localStorage.setItem("halo_profile", JSON.stringify({ username, state, zipcode }));
+      showToast("Profile saved");
+    });
+  }
+
+  document.getElementById("logout-btn").addEventListener("click", () => {
+    localStorage.removeItem("halo_user_email");
+    location.href = "index.html";
+  });
+
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2200);
+  }
+
+  trackPage();
+</script>
+</body>
+</html>

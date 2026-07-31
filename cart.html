@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Your Cart — HaloHome</title>
+<link rel="stylesheet" href="css/style.css" />
+<script src="js/rudder-config.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html">Halo<span class="dot">Home</span></a>
+    <nav class="main-nav">
+      <a href="index.html">Shop</a>
+    </nav>
+    <div class="header-actions">
+      <a class="btn-ghost-light" href="login.html" id="account-link">Sign In</a>
+      <a class="cart-link" href="cart.html">🛒<span class="cart-badge" id="cart-count">0</span></a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <h1>Your Cart</h1>
+  <div id="cart-root"></div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <strong>HaloHome</strong>
+      <p>Smart cameras and doorbells for a safer home.</p>
+    </div>
+    <div class="newsletter">
+      <strong>Get updates</strong>
+      <form id="newsletter-form">
+        <input type="email" placeholder="you@email.com" required />
+        <button class="btn" type="submit">Subscribe</button>
+      </form>
+    </div>
+  </div>
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  function renderCart() {
+    const root = document.getElementById("cart-root");
+    const items = getCart();
+
+    if (items.length === 0) {
+      root.innerHTML = `<div class="empty-state"><h2>Your cart is empty</h2><a class="btn" href="index.html">Continue shopping</a></div>`;
+      return;
+    }
+
+    root.innerHTML = `
+      <table class="cart-table">
+        <thead>
+          <tr><th>Product</th><th>Price</th><th>Qty</th><th>Total</th><th></th></tr>
+        </thead>
+        <tbody>
+          ${items.map((item) => `
+            <tr>
+              <td>${item.name}</td>
+              <td>${formatPrice(item.price)}</td>
+              <td><input type="number" min="1" value="${item.qty}" data-qty="${item.sku}" style="width:60px; padding:6px; border:1px solid var(--border); border-radius:6px;" /></td>
+              <td>${formatPrice(item.price * item.qty)}</td>
+              <td><button class="btn-danger" data-remove="${item.sku}">Remove</button></td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+      <div class="cart-summary">
+        <div class="row"><span>Subtotal</span><strong>${formatPrice(cartSubtotal())}</strong></div>
+        <a class="btn" style="display:block; text-align:center; margin-top:12px;" href="checkout.html">Proceed to Checkout</a>
+      </div>
+    `;
+
+    root.querySelectorAll("[data-qty]").forEach((input) => {
+      input.addEventListener("change", () => {
+        setQty(input.dataset.qty, parseInt(input.value, 10) || 1);
+        renderCart();
+      });
+    });
+    root.querySelectorAll("[data-remove]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        removeFromCart(btn.dataset.remove);
+        renderCart();
+      });
+    });
+  }
+
+  document.getElementById("newsletter-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    trackFormSubmit();
+    e.target.reset();
+    alert("Thanks for subscribing!");
+  });
+
+  const loggedInEmail = localStorage.getItem("halo_user_email");
+  if (loggedInEmail) {
+    const link = document.getElementById("account-link");
+    link.textContent = "My Account";
+    link.href = "account.html";
+  }
+
+  renderCart();
+  trackPage();
+</script>
+</body>
+</html>

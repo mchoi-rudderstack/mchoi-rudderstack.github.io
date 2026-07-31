@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Product — HaloHome</title>
+<link rel="stylesheet" href="css/style.css" />
+<script src="js/rudder-config.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html">Halo<span class="dot">Home</span></a>
+    <nav class="main-nav">
+      <a href="index.html">Shop</a>
+    </nav>
+    <div class="header-actions">
+      <a class="btn-ghost-light" href="login.html" id="account-link">Sign In</a>
+      <a class="cart-link" href="cart.html">🛒<span class="cart-badge" id="cart-count">0</span></a>
+    </div>
+  </div>
+</header>
+
+<div class="container" id="pdp-root"></div>
+
+<div class="toast" id="toast"></div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <strong>HaloHome</strong>
+      <p>Smart cameras and doorbells for a safer home.</p>
+    </div>
+    <div class="newsletter">
+      <strong>Get updates</strong>
+      <form id="newsletter-form">
+        <input type="email" placeholder="you@email.com" required />
+        <button class="btn" type="submit">Subscribe</button>
+      </form>
+    </div>
+  </div>
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  const sku = params.get("sku");
+  const product = findProduct(sku);
+  const root = document.getElementById("pdp-root");
+
+  if (!product) {
+    root.innerHTML = `<div class="empty-state"><h2>Product not found</h2><a class="btn" href="index.html">Back to shop</a></div>`;
+  } else {
+    root.innerHTML = `
+      <div class="pdp">
+        <div class="pdp-media">${product.icon}</div>
+        <div class="pdp-info">
+          <span class="badge" style="position:static; display:inline-block; margin-bottom:10px;">${product.category}</span>
+          <h1>${product.name}</h1>
+          <p class="price">${formatPrice(product.price)}${product.discount ? ' <span style="color:var(--danger); font-size:14px;">Sale</span>' : ""}</p>
+          <p class="desc">${product.description}</p>
+          <div class="qty-row">
+            <label for="qty">Qty</label>
+            <input type="number" id="qty" value="1" min="1" />
+            <button class="btn" id="add-to-cart">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+      ${product.hasLiveDemo ? `
+      <div class="demo-panel" id="demo-panel">
+        <h3>Try the live demo</h3>
+        <div class="demo-screen" id="demo-screen">Tap a button below to preview this device</div>
+        <div class="demo-buttons">
+          <button data-demo="live_view">▶️ Start Live View</button>
+          <button data-demo="motion_detected">🚶 Simulate Motion</button>
+          <button data-demo="alarm_triggered">🚨 Trigger Alarm</button>
+          <button data-demo="low_battery_notice">🔋 Low Battery Alert</button>
+          <button data-demo="video_clip_viewed">🎬 View Sample Clip</button>
+        </div>
+      </div>` : ""}
+    `;
+
+    document.getElementById("add-to-cart").addEventListener("click", () => {
+      const qty = Math.max(1, parseInt(document.getElementById("qty").value, 10) || 1);
+      addToCart(product, qty);
+      trackAddedToCart({ invoice_amount: product.price * qty, product_name: product.name });
+      showToast(`Added ${product.name} to cart`);
+    });
+
+    if (product.hasLiveDemo) {
+      let demoStarted = false;
+      const screen = document.getElementById("demo-screen");
+      const screenMessages = {
+        live_view: "🔴 Live view streaming...",
+        motion_detected: "🚶 Motion detected near the front entry",
+        alarm_triggered: "🚨 Alarm triggered! Siren activated.",
+        low_battery_notice: "🔋 Battery at 15% — time to recharge",
+        video_clip_viewed: "🎬 Playing 12-second clip from 2 minutes ago"
+      };
+
+      document.querySelectorAll("[data-demo]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          if (!demoStarted) {
+            demoStarted = true;
+            trackCameraActivated(product.sku);
+          }
+          const type = btn.dataset.demo;
+          screen.textContent = screenMessages[type];
+          if (type === "live_view") trackLiveView(product.sku);
+          if (type === "motion_detected") trackMotionDetected(product.sku);
+          if (type === "alarm_triggered") trackAlarmTriggered(product.sku);
+          if (type === "low_battery_notice") trackLowBatteryNotice(product.sku);
+          if (type === "video_clip_viewed") trackVideoClipViewed(product.sku);
+        });
+      });
+    }
+
+    trackPdpViewed(product);
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2200);
+  }
+
+  document.getElementById("newsletter-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    trackFormSubmit();
+    showToast("Thanks for subscribing!");
+    e.target.reset();
+  });
+
+  const loggedInEmail = localStorage.getItem("halo_user_email");
+  if (loggedInEmail) {
+    const link = document.getElementById("account-link");
+    link.textContent = "My Account";
+    link.href = "account.html";
+  }
+
+  trackPage();
+</script>
+</body>
+</html>

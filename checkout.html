@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Checkout — HaloHome</title>
+<link rel="stylesheet" href="css/style.css" />
+<script src="js/rudder-config.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html">Halo<span class="dot">Home</span></a>
+    <nav class="main-nav"></nav>
+    <div class="header-actions">
+      <a class="cart-link" href="cart.html">🛒<span class="cart-badge" id="cart-count">0</span></a>
+    </div>
+  </div>
+</header>
+
+<div class="container" id="checkout-root"></div>
+
+<script src="js/products.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  const root = document.getElementById("checkout-root");
+  const items = getCart();
+  const savedEmail = localStorage.getItem("halo_user_email") || "";
+
+  if (items.length === 0) {
+    root.innerHTML = `<div class="empty-state"><h2>Your cart is empty</h2><a class="btn" href="index.html">Continue shopping</a></div>`;
+  } else {
+    root.innerHTML = `
+      <div class="form-page" style="max-width:520px;">
+        <h2>Checkout</h2>
+        <p class="hint">Demo only — no real payment is processed and no card details are stored or sent anywhere.</p>
+        <form id="checkout-form">
+          <div class="form-grid-2">
+            <div class="field"><label>First name</label><input required id="first_name" /></div>
+            <div class="field"><label>Last name</label><input required id="last_name" /></div>
+          </div>
+          <div class="field"><label>Email</label><input required type="email" id="email" value="${savedEmail}" /></div>
+          <div class="field"><label>Street address</label><input required id="address" /></div>
+          <div class="form-grid-2">
+            <div class="field"><label>State</label><input required id="state" maxlength="2" placeholder="CA" /></div>
+            <div class="field"><label>ZIP code</label><input required id="zipcode" /></div>
+          </div>
+          <div class="form-grid-2">
+            <div class="field"><label>Card number</label><input required placeholder="4242 4242 4242 4242" /></div>
+            <div class="field"><label>Expiry</label><input required placeholder="MM/YY" /></div>
+          </div>
+          <div class="cart-summary" style="max-width:none; padding:16px; margin-bottom:20px;">
+            ${items.map((i) => `<div class="row"><span>${i.name} × ${i.qty}</span><span>${formatPrice(i.price * i.qty)}</span></div>`).join("")}
+            <div class="row" style="border-top:1px solid var(--border); padding-top:8px; margin-top:8px;"><strong>Total</strong><strong>${formatPrice(cartSubtotal())}</strong></div>
+          </div>
+          <button class="btn" type="submit" style="width:100%;">Place Order</button>
+        </form>
+      </div>
+    `;
+
+    document.getElementById("checkout-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const first_name = document.getElementById("first_name").value;
+      const last_name = document.getElementById("last_name").value;
+      const email = document.getElementById("email").value;
+      const state = document.getElementById("state").value;
+      const zipcode = document.getElementById("zipcode").value;
+
+      const orderNumber = "HH-" + Date.now().toString(36).toUpperCase();
+      const orderDate = new Date().toISOString();
+
+      items.forEach((item) => {
+        trackOrderCompleted({
+          order_number: orderNumber,
+          email,
+          shopify_customer_id: shopifyCustomerId,
+          order_date: orderDate,
+          device_id: item.sku,
+          order_amount: item.price * item.qty,
+          device_name: item.name,
+          first_name,
+          last_name,
+          product: {
+            product_name: item.name,
+            sku: item.sku,
+            category: item.category,
+            discount: item.discount
+          }
+        });
+      });
+
+      identifyUser(email, { email });
+
+      const orders = JSON.parse(localStorage.getItem("halo_orders") || "[]");
+      orders.unshift({
+        order_number: orderNumber,
+        order_date: orderDate,
+        total: cartSubtotal(),
+        items: items.map((i) => ({ name: i.name, sku: i.sku, qty: i.qty, category: i.category }))
+      });
+      localStorage.setItem("halo_orders", JSON.stringify(orders));
+      localStorage.setItem("halo_user_email", email);
+
+      clearCart();
+
+      root.innerHTML = `
+        <div class="confirmation">
+          <div class="big-check">✅</div>
+          <h2>Order confirmed</h2>
+          <p>Order <strong>${orderNumber}</strong> has been placed. A confirmation was sent to ${email}.</p>
+          <a class="btn" href="account.html">View my account</a>
+          <a class="btn-secondary" style="margin-left:10px; padding:12px 22px; border-radius:999px;" href="index.html">Continue shopping</a>
+        </div>
+      `;
+    });
+  }
+
+  trackPage();
+</script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sign In — HaloHome</title>
+<link rel="stylesheet" href="css/style.css" />
+<script src="js/rudder-config.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html">Halo<span class="dot">Home</span></a>
+    <nav class="main-nav"></nav>
+    <div class="header-actions">
+      <a class="cart-link" href="cart.html">🛒<span class="cart-badge" id="cart-count">0</span></a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="form-page">
+    <div class="form-tabs">
+      <button id="tab-signin" class="active">Sign In</button>
+      <button id="tab-signup">Create Account</button>
+    </div>
+
+    <div class="form-section active" id="section-signin">
+      <form id="signin-form">
+        <div class="field"><label>Email</label><input required type="email" id="signin-email" /></div>
+        <div class="field"><label>Password</label><input required type="password" id="signin-password" /></div>
+        <button class="btn" type="submit" style="width:100%;">Sign In</button>
+      </form>
+    </div>
+
+    <div class="form-section" id="section-signup">
+      <form id="signup-form">
+        <div class="field"><label>Email</label><input required type="email" id="signup-email" /></div>
+        <div class="field"><label>Password</label><input required type="password" id="signup-password" /></div>
+        <div class="field"><label>Date of birth (optional)</label><input type="date" id="signup-dob" /></div>
+        <button class="btn" type="submit" style="width:100%;">Create Account</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="js/products.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  document.getElementById("tab-signin").addEventListener("click", () => switchTab("signin"));
+  document.getElementById("tab-signup").addEventListener("click", () => switchTab("signup"));
+
+  function switchTab(tab) {
+    document.getElementById("tab-signin").classList.toggle("active", tab === "signin");
+    document.getElementById("tab-signup").classList.toggle("active", tab === "signup");
+    document.getElementById("section-signin").classList.toggle("active", tab === "signin");
+    document.getElementById("section-signup").classList.toggle("active", tab === "signup");
+  }
+
+  document.getElementById("signin-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("signin-email").value;
+
+    trackLogin();
+    identifyUser(email, { email });
+
+    localStorage.setItem("halo_user_email", email);
+    location.href = "account.html";
+  });
+
+  document.getElementById("signup-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("signup-email").value;
+    const dob = document.getElementById("signup-dob").value;
+
+    trackAccountCreated();
+    identifyUser(email, dob ? { email, date_of_birth: dob } : { email });
+
+    localStorage.setItem("halo_user_email", email);
+    location.href = "account.html";
+  });
+
+  trackPage();
+</script>
+</body>
+</html>

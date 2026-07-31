@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HaloHome — Smart Home Security</title>
+<link rel="stylesheet" href="css/style.css" />
+<script src="js/rudder-config.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html">Halo<span class="dot">Home</span></a>
+    <nav class="main-nav">
+      <a href="index.html">Shop</a>
+      <a href="index.html#cameras">Cameras</a>
+      <a href="index.html#doorbells">Doorbells</a>
+    </nav>
+    <div class="header-actions">
+      <a class="btn-ghost-light" href="login.html" id="account-link">Sign In</a>
+      <a class="cart-link" href="cart.html">🛒<span class="cart-badge" id="cart-count">0</span></a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <h1>See your home clearly, from anywhere.</h1>
+    <p>Smart cameras and video doorbells that are easy to set up, easy to use, and priced for everyone.</p>
+    <a class="btn" href="#shop">Shop Now</a>
+  </div>
+</section>
+
+<div class="container" id="shop">
+  <div class="filters" id="filters"></div>
+  <div class="product-grid" id="product-grid"></div>
+</div>
+
+<div class="modal-backdrop" id="quick-view-modal">
+  <div class="modal">
+    <button class="modal-close" id="quick-view-close">✕</button>
+    <div id="quick-view-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <strong>HaloHome</strong>
+      <p>Smart cameras and doorbells for a safer home.</p>
+    </div>
+    <div class="newsletter">
+      <strong>Get updates</strong>
+      <form id="newsletter-form">
+        <input type="email" placeholder="you@email.com" required />
+        <button class="btn" type="submit">Subscribe</button>
+      </form>
+    </div>
+  </div>
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  const CATEGORIES = ["all", "camera", "doorbell", "floodlight", "sensor", "other"];
+  const CATEGORY_LABELS = {
+    all: "All",
+    camera: "Cameras",
+    doorbell: "Doorbells",
+    floodlight: "Floodlights",
+    sensor: "Sensors",
+    other: "Accessories"
+  };
+  let activeCategory = "all";
+
+  function renderFilters() {
+    const el = document.getElementById("filters");
+    el.innerHTML = CATEGORIES.map(
+      (c) => `<button class="filter-chip ${c === activeCategory ? "active" : ""}" data-cat="${c}">${CATEGORY_LABELS[c]}</button>`
+    ).join("");
+    el.querySelectorAll(".filter-chip").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeCategory = btn.dataset.cat;
+        renderFilters();
+        renderGrid();
+      });
+    });
+  }
+
+  function renderGrid() {
+    const grid = document.getElementById("product-grid");
+    const items = activeCategory === "all" ? PRODUCTS : PRODUCTS.filter((p) => p.category === activeCategory);
+    grid.innerHTML = items.map((p) => `
+      <div class="product-card">
+        <div class="product-media">
+          <span class="badge">${p.category}</span>
+          ${p.discount ? '<span class="badge discount">Sale</span>' : ""}
+          ${p.icon}
+        </div>
+        <div class="product-body">
+          <h3>${p.name}</h3>
+          <p class="desc">${p.description}</p>
+          <div class="price-row">
+            <span class="price">${formatPrice(p.price)}</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn-secondary" data-quickview="${p.sku}">Quick View</button>
+            <a class="btn" href="product.html?sku=${p.sku}">View</a>
+          </div>
+        </div>
+      </div>
+    `).join("");
+
+    grid.querySelectorAll("[data-quickview]").forEach((btn) => {
+      btn.addEventListener("click", () => openQuickView(btn.dataset.quickview));
+    });
+  }
+
+  function openQuickView(sku) {
+    const p = findProduct(sku);
+    if (!p) return;
+    document.getElementById("quick-view-body").innerHTML = `
+      <div style="font-size:64px; text-align:center; margin-bottom:12px;">${p.icon}</div>
+      <h2 style="margin:0 0 6px;">${p.name}</h2>
+      <p style="color:var(--muted); margin:0 0 14px;">${p.description}</p>
+      <p class="price" style="font-size:20px; margin-bottom:16px;">${formatPrice(p.price)}</p>
+      <a class="btn" style="width:100%; text-align:center; display:block;" href="product.html?sku=${p.sku}">View Full Details</a>
+    `;
+    document.getElementById("quick-view-modal").classList.add("open");
+
+    // product_viewed: fired for lightweight "quick look" impressions from the
+    // grid, as distinct from the full pdp_viewed event on the PDP itself.
+    trackProductViewed(p.name);
+  }
+
+  document.getElementById("quick-view-close").addEventListener("click", () => {
+    document.getElementById("quick-view-modal").classList.remove("open");
+  });
+  document.getElementById("quick-view-modal").addEventListener("click", (e) => {
+    if (e.target.id === "quick-view-modal") e.target.classList.remove("open");
+  });
+
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2200);
+  }
+
+  document.getElementById("newsletter-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    trackFormSubmit();
+    showToast("Thanks for subscribing!");
+    e.target.reset();
+  });
+
+  const loggedInEmail = localStorage.getItem("halo_user_email");
+  if (loggedInEmail) {
+    const link = document.getElementById("account-link");
+    link.textContent = "My Account";
+    link.href = "account.html";
+  }
+
+  renderFilters();
+  renderGrid();
+  trackPage();
+</script>
+</body>
+</html>

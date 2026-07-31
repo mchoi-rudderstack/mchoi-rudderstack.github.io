@@ -67,6 +67,9 @@
             <input type="number" id="qty" value="1" min="1" />
             <button class="btn" id="add-to-cart">Add to Cart</button>
           </div>
+          <div class="share-row">
+            <button class="btn-ghost" id="share-btn">&#8679; Share</button>
+          </div>
         </div>
       </div>
       ${product.hasLiveDemo ? `
@@ -88,6 +91,27 @@
       addToCart(product, qty);
       trackAddedToCart({ invoice_amount: product.price * qty, product_name: product.name });
       showToast(`Added ${product.name} to cart`);
+    });
+
+    document.getElementById("share-btn").addEventListener("click", async () => {
+      let shareMethod;
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: product.name, url: location.href });
+          shareMethod = "native_share";
+        } catch (err) {
+          if (err.name === "AbortError") return; // user dismissed — do not track
+          // navigator.share failed unexpectedly; fall back to clipboard
+          await navigator.clipboard.writeText(location.href);
+          shareMethod = "copy_link";
+          showToast("Link copied!");
+        }
+      } else {
+        await navigator.clipboard.writeText(location.href);
+        shareMethod = "copy_link";
+        showToast("Link copied!");
+      }
+      trackProductShared(product, shareMethod);
     });
 
     if (product.hasLiveDemo) {
